@@ -1,0 +1,13 @@
+Python
+pycache/
+*.py[cod]
+*.so
+*.egg-info/
+.env
+venv/
+env/
+.DS_Store
+db.sqlite3
+db_backend.sqlite3
+*.pyc
+.vscode/
