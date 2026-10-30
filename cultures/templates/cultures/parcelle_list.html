@@ -1,50 +1,27 @@
-<!-- cultures/templates/cultures/parcelle_list.html -->
-{% extends 'cultures/base_cultures.html' %}
-
-{% block cultures_content %}
-<div class="page-header">
-    <h1>🌾 Mes parcelles</h1>
-    {% if request.user.role == "ADMIN" %}
-    <a href="{% url 'cultures:parcelle_create' %}" class="btn btn-primary">
-        ➕ Nouvelle parcelle
-    </a>
-    {% endif %}
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Parcelles{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Parcelles</h1><p>Terres exploitées, superficies et nature des sols.</p></div>
+  <div class="page-actions">{% if can_admin %}<a class="btn btn-primary" href="{% url 'cultures:parcelle_create' %}">{% icon "plus" 16 %}Nouvelle parcelle</a>{% endif %}</div>
 </div>
-
+{% include "cultures/_tabs.html" %}
 {% if parcelles %}
-<div class="parcelles-grid">
-    {% for parcelle in parcelles %}
-    <div class="parcelle-card">
-        <div class="parcelle-header">
-            <h3>{{ parcelle.nom }}</h3>
-            {% if request.user.role == "ADMIN" %}
-            <div class="parcelle-actions">
-                <a href="{% url 'cultures:parcelle_update' parcelle.pk %}" class="btn-icon" title="Modifier">✏️</a>
-                <a href="{% url 'cultures:parcelle_delete' parcelle.pk %}" class="btn-icon delete" title="Supprimer">🗑️</a>
-            </div>
-            {% endif %}
-        </div>
-        <div class="parcelle-body">
-            <p><strong>📐 Superficie :</strong> {{ parcelle.superficie }} ha</p>
-            <p><strong>🌱 Type de sol :</strong> {{ parcelle.type_sol|default:"Non renseigné" }}</p>
-            <p><strong>📍 Localisation :</strong> {{ parcelle.localisation|default:"Non renseignée" }}</p>
-        </div>
-        <div class="parcelle-footer">
-            <span class="badge">{{ parcelle.cultures_count }} culture(s)</span>
-        </div>
+<div class="grid g3">
+  {% for p in parcelles %}
+  <div class="card"><div class="card-b">
+    <div style="display:flex;justify-content:space-between;gap:10px">
+      <div style="display:flex;gap:12px;align-items:center"><span class="chip-ic t-green">{% icon "map-pin" 20 %}</span>
+        <div><div style="font-weight:700;font-size:15px">{{ p.nom }}</div><div class="muted" style="font-size:12.5px">{{ p.type_sol|default:"Sol non précisé" }}</div></div></div>
+      <div class="row-actions">{% if can_admin %}<a class="btn" href="{% url 'cultures:parcelle_update' p.pk %}" title="Modifier">{% icon "pencil" 16 %}</a><a class="btn del" href="{% url 'cultures:parcelle_delete' p.pk %}" title="Supprimer">{% icon "trash-2" 16 %}</a>{% endif %}</div>
     </div>
-    {% endfor %}
+    <div class="kpi-val" style="margin:18px 0 4px">{{ p.superficie|num:2 }}<small>ha</small></div>
+    <div class="muted" style="font-size:12.5px">{{ p.cultures_count }} culture{{ p.cultures_count|pluralize }} associée{{ p.cultures_count|pluralize }}{% if p.localisation %} · {{ p.localisation }}{% endif %}</div>
+  </div></div>
+  {% endfor %}
 </div>
 {% else %}
-<div class="empty-state">
-    <div class="empty-icon">🌾</div>
-    <h3>Aucune parcelle</h3>
-    <p>Commencez par créer votre première parcelle.</p>
-    {% if request.user.role == "ADMIN" %}
-    <a href="{% url 'cultures:parcelle_create' %}" class="btn btn-primary">
-        ➕ Créer une parcelle
-    </a>
-    {% endif %}
-</div>
+<div class="card">{% url 'cultures:parcelle_create' as u %}{% include "ui/_empty.html" with icon_name="map-pin" title="Aucune parcelle" text="Déclarez vos parcelles pour y associer des cultures." cta_url=u cta_label="Nouvelle parcelle" %}</div>
 {% endif %}
 {% endblock %}

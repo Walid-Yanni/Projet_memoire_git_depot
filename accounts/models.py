@@ -24,7 +24,7 @@ class Ferme(models.Model):
         return self.nom
 
     # ==============================
-    # 🔥 PROPRIÉTÉS AJOUTÉES
+    # PROPRIÉTÉS AJOUTÉES
     # ==============================
     @property
     def admin_principal(self):
@@ -44,6 +44,7 @@ class User(AbstractUser):
     ROLE_CHOICES = [
         ('ADMIN', 'Administrateur'),
         ('EMPLOYE', 'Employé'),
+        ('VISITEUR', 'Visiteur (lecture seule)'),
     ]
 
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='EMPLOYE')
@@ -51,7 +52,7 @@ class User(AbstractUser):
     phone = models.CharField(max_length=20, blank=True)
     adresse = models.CharField(max_length=255, blank=True)
 
-    # 🔥 Lien vers la ferme
+    # Lien vers la ferme
     ferme = models.ForeignKey(
         Ferme,
         on_delete=models.CASCADE,
@@ -66,7 +67,7 @@ class User(AbstractUser):
     class Meta:
         verbose_name = "Utilisateur"
         verbose_name_plural = "Utilisateurs"
-        # 🔥 PERMISSIONS AJOUTÉES CI-DESSOUS
+        # PERMISSIONS AJOUTÉES CI-DESSOUS
         permissions = [
             ("can_manage_users", "Peut gérer les utilisateurs de sa ferme"),
             ("can_view_reports", "Peut consulter tous les rapports"),
@@ -77,16 +78,15 @@ class User(AbstractUser):
         return f"{self.username} ({self.get_role_display()})"
 
     # ==============================
-    # VALIDATION MÉTIER 🔥
-    # ==============================
+    # VALIDATION MÉTIER     # ==============================
     def clean(self):
         super().clean()
 
-        # 🔴 Un utilisateur doit appartenir à une ferme
+        # Un utilisateur doit appartenir à une ferme
         if not self.ferme:
             raise ValidationError("Un utilisateur doit être rattaché à une ferme.")
 
-        # 🔴 Un seul ADMIN par ferme
+        # Un seul ADMIN par ferme
         if self.role == 'ADMIN':
             qs = User.objects.filter(ferme=self.ferme, role='ADMIN')
 
@@ -98,20 +98,13 @@ class User(AbstractUser):
                 raise ValidationError("Cette ferme possède déjà un administrateur.")
 
     # ==============================
-    # SAUVEGARDE SÉCURISÉE 🔐
-    # ==============================
+    # SAUVEGARDE SÉCURISÉE     # ==============================
     def save(self, *args, **kwargs):
         self.full_clean()  # force validation avant sauvegarde
         super().save(*args, **kwargs)
 
     # ==============================
-    # REDIRECTION INTELLIGENTE 🧭
-    # ==============================
+    # REDIRECTION INTELLIGENTE     # ==============================
     def get_dashboard_url(self):
         """Retourne l'URL du dashboard selon le rôle"""
-        if self.role == 'ADMIN':
-            return reverse_lazy('accounts:admin_dashboard')
-        elif self.role == 'EMPLOYE':
-            return reverse_lazy('accounts:employe_dashboard')
-        else:
-            return reverse_lazy('admin:index')
+        return reverse_lazy('dashboard:home')

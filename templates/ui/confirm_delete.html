@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Confirmer la suppression{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Confirmer la suppression</h1></div></div>
+<div class="card form-card"><div class="card-b">
+  <div style="display:flex;gap:16px;align-items:flex-start">
+    <span class="chip-ic t-red" style="width:46px;height:46px">{% icon "trash-2" 22 %}</span>
+    <div>
+      <h2 style="font-size:17px;margin-bottom:6px">Supprimer cet élément ?</h2>
+      <p class="muted">« {{ object }} » sera définitivement supprimé. Cette action est irréversible.</p>
+      {% block warning %}{% endblock %}
+    </div>
+  </div>
+  <form method="post" class="form-actions">
+    {% csrf_token %}
+    <a class="btn btn-ghost" href="{% block cancel_url %}javascript:history.back(){% endblock %}">Annuler</a>
+    <button class="btn btn-danger" type="submit">{% icon "trash-2" 16 %}Supprimer définitivement</button>
+  </form>
+</div></div>
+{% endblock %}

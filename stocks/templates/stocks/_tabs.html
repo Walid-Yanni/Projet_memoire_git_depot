@@ -1,0 +1,6 @@
+{% load ui %}
+<div class="seg" style="margin-bottom:20px">
+  <a href="{% url 'stocks:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}on{% endif %}">Vue d'ensemble</a>
+  <a href="{% url 'stocks:produit_list' %}" class="{% if request.resolver_match.url_name|slice:':7' == 'produit' %}on{% endif %}">Produits</a>
+  <a href="{% url 'stocks:mouvement_list' %}" class="{% if request.resolver_match.url_name|slice:':9' == 'mouvement' %}on{% endif %}">Mouvements</a>
+</div>

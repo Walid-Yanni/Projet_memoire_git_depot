@@ -34,7 +34,7 @@ def logout_view(request):
     """Vue de déconnexion"""
     logout(request)
     messages.info(request, "Vous avez été déconnecté.")
-    return redirect('accounts:login')
+    return redirect('core:landing')
 
 
 @login_required

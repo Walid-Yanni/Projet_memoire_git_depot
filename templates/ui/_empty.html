@@ -1,0 +1,6 @@
+{% load ui %}<div class="empty">
+  <div class="ic-wrap">{% icon icon_name|default:"database" 26 %}</div>
+  <h3>{{ title|default:"Rien à afficher pour le moment" }}</h3>
+  <p>{{ text }}</p>
+  {% if cta_url and can_write %}<p style="margin-top:16px"><a class="btn btn-primary" href="{{ cta_url }}">{% icon "plus" 16 %}{{ cta_label|default:"Ajouter" }}</a></p>{% endif %}
+</div>

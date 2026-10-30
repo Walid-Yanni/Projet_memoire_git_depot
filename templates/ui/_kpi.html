@@ -1,0 +1,5 @@
+{% load ui %}<div class="card kpi">
+  <div class="kpi-top"><span class="kpi-label">{{ label }}</span><span class="kpi-ic {{ tone|default:'t-green' }}">{% icon icon_name 19 %}</span></div>
+  <div class="kpi-val">{{ value }}{% if unit %}<small>{{ unit }}</small>{% endif %}</div>
+  {% if foot %}<div class="kpi-foot">{{ foot }}{% if foot_val != None %} <b>{{ foot_val }}</b>{% endif %}</div>{% endif %}
+</div>

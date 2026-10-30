@@ -1,0 +1,56 @@
+{% extends "ui/public_base.html" %}
+{% load ui %}
+{% block title %}Gestion de ferme agro-pastorale{% endblock %}
+{% block body %}
+<header class="pub-nav">
+  <a class="brand" href="{% url 'core:landing' %}"><span class="brand-mark">{% icon "sprout" 20 %}</span><span class="brand-name">FermeApp</span></a>
+  <a class="btn btn-line btn-sm" href="{% url 'accounts:login' %}">{% icon "log-in" 15 %}Connexion</a>
+</header>
+
+<section class="hero">
+  <div>
+    <span class="eyebrow">{% icon "badge-check" 15 %}Projet de fin d'études, mis en ligne</span>
+    <h1>Pilotez toute votre ferme depuis <em>un seul écran</em>.</h1>
+    <p class="lead">Élevage, cultures, stocks et finances réunis dans une application web pensée pour les exploitations agro-pastorales : saisie rapide au quotidien, indicateurs clairs, alertes utiles.</p>
+    <div class="cta-row">
+      <form method="post" action="{% url 'core:demo_login' %}">{% csrf_token %}
+        <button class="btn btn-glow btn-lg" type="submit">{% icon "play" 17 %}Essayer la démo</button>
+      </form>
+      <a class="btn btn-line btn-lg" href="#modules">{% icon "layers" 17 %}Voir les modules</a>
+    </div>
+    <p style="margin-top:16px;font-size:13px;color:#6f889c">{% icon "eye" 14 %} Aucune inscription. Données fictives, accès en lecture seule.</p>
+  </div>
+  <div class="mock" aria-hidden="true">
+    <div class="mock-bar"><i></i><i></i><i></i></div>
+    <div class="mock-kpis">
+      <div class="mock-kpi"><small>Œufs / jour</small><b>612</b></div>
+      <div class="mock-kpi"><small>Animaux actifs</small><b>26</b></div>
+      <div class="mock-kpi"><small>Solde 30 j</small><b>+1,2 M</b></div>
+    </div>
+    <div class="mock-chart"><i style="height:38%"></i><i style="height:52%"></i><i style="height:46%"></i><i style="height:64%"></i><i style="height:58%"></i><i style="height:72%"></i><i style="height:66%"></i><i style="height:84%"></i><i style="height:78%"></i><i style="height:92%"></i></div>
+  </div>
+</section>
+
+<section class="sec" id="modules">
+  <h2>Des modules qui parlent le langage de la ferme</h2>
+  <p class="lead">Chaque module répond à une tâche réelle du quotidien et partage les mêmes données.</p>
+  <div class="feat-grid">
+    <div class="feat"><span class="chip-ic">{% icon "beef" 22 %}</span><h3>Élevage</h3><p>Registre des animaux, lots de pondeuses, rapports journaliers (ponte, mortalité, aliment) et suivi sanitaire avec rappels.</p></div>
+    <div class="feat"><span class="chip-ic">{% icon "wheat" 22 %}</span><h3>Cultures</h3><p>Parcelles, cycles de culture, activités agricoles et rendements, de la mise en terre à la récolte.</p></div>
+    <div class="feat"><span class="chip-ic">{% icon "boxes" 22 %}</span><h3>Stocks</h3><p>Entrées, sorties traçables, seuils d'alerte et valorisation des intrants, sans erreur de concurrence.</p></div>
+    <div class="feat"><span class="chip-ic">{% icon "wallet" 22 %}</span><h3>Finances</h3><p>Journal des recettes et dépenses, répartition par catégorie, évolution sur 12 mois et export CSV.</p></div>
+    <div class="feat"><span class="chip-ic">{% icon "bell-ring" 22 %}</span><h3>Alertes</h3><p>Vaccins à renouveler, stocks bas, animaux malades, récoltes proches : tout remonte au tableau de bord.</p></div>
+    <div class="feat"><span class="chip-ic">{% icon "shield-check" 22 %}</span><h3>Rôles et sécurité</h3><p>Administrateur, employé et visiteur ; isolation stricte des données par ferme, droits appliqués côté serveur.</p></div>
+  </div>
+</section>
+
+<section class="sec" style="padding-top:8px">
+  <h2>Sous le capot</h2>
+  <p class="lead">Architecture simple, déployée gratuitement et maintenable.</p>
+  <div class="stack-row">
+    <span class="tag">Django 5.2</span><span class="tag">PostgreSQL (Supabase)</span><span class="tag">Vercel</span><span class="tag">HTMX</span><span class="tag">Chart.js</span><span class="tag">Design system maison</span><span class="tag">Tests automatisés</span>
+  </div>
+</section>
+
+<footer class="pub-foot">FermeApp · Projet de fin d'études, Réseaux et Génie Logiciel · Démonstration avec données fictives</footer>
+{% endblock %}

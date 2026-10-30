@@ -19,7 +19,7 @@ from .views import (
     TraitementDeleteView,
 )
 
-app_name = 'cheptel'  # ← AJOUTE CETTE LIGNE !
+app_name = 'cheptel'  # AJOUTE CETTE LIGNE !
 
 # cheptel/urls.py (ajoute dans urlpatterns)
 
@@ -30,20 +30,20 @@ urlpatterns = [
     path('<int:pk>/edit/', AnimalUpdateView.as_view(), name='animal_edit'),
     path('<int:pk>/delete/', AnimalDeleteView.as_view(), name='animal_delete'),
     
-    # 🔥 NOUVELLES URLs pour les lots
+    # NOUVELLES URLs pour les lots
     path('lots/', LotListView.as_view(), name='lot_list'),
     path('lots/add/', LotCreateView.as_view(), name='lot_create'),
     path('lots/<int:pk>/edit/', LotUpdateView.as_view(), name='lot_edit'),
     path('lots/<int:pk>/delete/', LotDeleteView.as_view(), name='lot_delete'),
 
-    # 🔥 RAPPORTS JOURNALIERS
+    # RAPPORTS JOURNALIERS
     path('rapports/', RapportJournalierListView.as_view(), name='rapport_list'),
     path('rapport_list/', RapportJournalierListView.as_view(), name='rapport_list_legacy'),
     path('rapports/add/', RapportJournalierCreateView.as_view(), name='rapport_add'),
     path('rapports/<int:pk>/edit/', RapportJournalierUpdateView.as_view(), name='rapport_edit'),
     path('rapports/<int:pk>/delete/', RapportJournalierDeleteView.as_view(), name='rapport_delete'),
 
-    # 🔥 TRAITEMENTS SANITAIRES
+    # TRAITEMENTS SANITAIRES
     path('traitements/', TraitementListView.as_view(), name='traitement_list'),
     path('traitements/add/', TraitementCreateView.as_view(), name='traitement_add'),
     path('traitements/<int:pk>/edit/', TraitementUpdateView.as_view(), name='traitement_edit'),

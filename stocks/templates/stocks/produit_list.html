@@ -1,96 +1,28 @@
-<!-- stocks/templates/stocks/produit_list.html -->
-{% extends 'stocks/base_stocks.html' %}
-
-{% block stocks_content %}
-<div class="page-header">
-    <h1>📦 Gestion des stocks</h1>
-    {% if request.user.role == "ADMIN" %}
-    <a href="{% url 'stocks:produit_create' %}" class="btn btn-primary">
-        ➕ Nouveau produit
-    </a>
-    {% endif %}
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Produits en stock{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Produits en stock</h1><p>Catalogue des intrants, seuils et prix moyens.</p></div>
+  <div class="page-actions">{% if can_admin %}<a class="btn btn-primary" href="{% url 'stocks:produit_create' %}">{% icon "plus" 16 %}Nouveau produit</a>{% endif %}</div>
 </div>
-
-<!-- Filtre alerte -->
-<div class="filters-card">
-    <form method="get" class="filters-form">
-        <div class="form-group">
-            <label for="alerte">Filtre</label>
-            <select name="alerte" id="alerte" class="form-control">
-                <option value="">Tous les produits</option>
-                <option value="1" {% if request.GET.alerte == '1' %}selected{% endif %}>
-                    ⚠️ Produits en alerte
-                </option>
-            </select>
-        </div>
-        <div class="filter-actions">
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-            <a href="{% url 'stocks:produit_list' %}" class="btn btn-secondary">Réinitialiser</a>
-        </div>
-    </form>
+{% include "stocks/_tabs.html" %}
+<div class="card">
+  <div class="toolbar">
+    <div class="seg"><a href="{% url 'stocks:produit_list' %}" class="{% if request.GET.alerte != '1' %}on{% endif %}">Tous</a><a href="?alerte=1" class="{% if request.GET.alerte == '1' %}on{% endif %}">En alerte ({{ produits_en_alerte }})</a></div>
+  </div>
+  {% if produits %}
+  <div class="table-wrap"><table class="tbl">
+    <thead><tr><th>Produit</th><th class="right">Quantité</th><th class="right">Seuil</th><th>Fournisseur</th><th class="right">Prix moyen</th><th></th></tr></thead>
+    <tbody>{% for p in produits %}
+    <tr>
+      <td><div class="cell-main">{{ p.nom }}</div><div class="cell-sub">{{ p.emplacement|default:"-" }}</div></td>
+      <td class="right mono"><span class="badge {% if p.est_en_alerte %}t-red{% else %}t-green{% endif %}">{{ p.quantite_actuelle|num:0 }} {{ p.unite_courte }}</span></td>
+      <td class="right mono muted">{{ p.seuil_alerte|num:0 }}</td>
+      <td>{{ p.fournisseur_principal|default:"-" }}</td>
+      <td class="right mono">{% if p.prix_moyen_unitaire %}{{ p.prix_moyen_unitaire|fcfa }}{% else %}-{% endif %}</td>
+      <td><div class="row-actions">{% if can_admin %}<a class="btn" href="{% url 'stocks:produit_update' p.pk %}">{% icon "pencil" 16 %}</a><a class="btn del" href="{% url 'stocks:produit_delete' p.pk %}">{% icon "trash-2" 16 %}</a>{% endif %}</div></td>
+    </tr>{% endfor %}</tbody></table></div>
+  {% else %}{% include "ui/_empty.html" with icon_name="package" title="Aucun produit" text="Aucun produit ne correspond." %}{% endif %}
 </div>
-
-{% if produits %}
-<div class="produits-grid">
-    {% for produit in produits %}
-    <div class="produit-card">
-        <div class="produit-header {% if produit.est_en_alerte %}alerte{% endif %}">
-            <h3>{{ produit.nom }}</h3>
-            {% if request.user.role == "ADMIN" %}
-            <div class="produit-actions">
-                <a href="{% url 'stocks:produit_update' produit.pk %}" title="Modifier">✏️</a>
-                <a href="{% url 'stocks:produit_delete' produit.pk %}" title="Supprimer">🗑️</a>
-            </div>
-            {% endif %}
-        </div>
-        <div class="produit-body">
-            <div class="produit-quantite {% if produit.est_en_alerte %}alerte{% endif %}">
-                {{ produit.quantite_actuelle }} {{ produit.get_unite_display }}
-            </div>
-            <p><strong>📏 Unité :</strong> {{ produit.get_unite_display }}</p>
-            {% if produit.emplacement %}
-            <p><strong>📍 Emplacement :</strong> {{ produit.emplacement }}</p>
-            {% endif %}
-            {% if produit.seuil_alerte > 0 %}
-            <p><strong>⚠️ Seuil alerte :</strong> {{ produit.seuil_alerte }} {{ produit.get_unite_display }}</p>
-            {% endif %}
-        </div>
-        <div class="produit-footer">
-            <span class="badge">{{ produit.mouvements.count }} mouvement(s)</span>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-
-<!-- Pagination -->
-{% if produits.has_other_pages %}
-<div class="pagination">
-    {% if produits.has_previous %}
-        <a href="?page=1{% if request.GET.alerte %}&alerte={{ request.GET.alerte }}{% endif %}" class="btn-page">«</a>
-        <a href="?page={{ produits.previous_page_number }}{% if request.GET.alerte %}&alerte={{ request.GET.alerte }}{% endif %}" class="btn-page">‹</a>
-    {% endif %}
-    
-    <span class="page-current">
-        Page {{ produits.number }} / {{ produits.paginator.num_pages }}
-    </span>
-    
-    {% if produits.has_next %}
-        <a href="?page={{ produits.next_page_number }}{% if request.GET.alerte %}&alerte={{ request.GET.alerte }}{% endif %}" class="btn-page">›</a>
-        <a href="?page={{ produits.paginator.num_pages }}{% if request.GET.alerte %}&alerte={{ request.GET.alerte }}{% endif %}" class="btn-page">»</a>
-    {% endif %}
-</div>
-{% endif %}
-
-{% else %}
-<div class="empty-state">
-    <div class="empty-icon">📦</div>
-    <h3>Aucun produit</h3>
-    <p>Commencez par ajouter des produits à votre stock.</p>
-    {% if request.user.role == "ADMIN" %}
-    <a href="{% url 'stocks:produit_create' %}" class="btn btn-primary">
-        ➕ Ajouter un produit
-    </a>
-    {% endif %}
-</div>
-{% endif %}
 {% endblock %}

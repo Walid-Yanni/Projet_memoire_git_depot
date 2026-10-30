@@ -50,7 +50,7 @@ class Produit(models.Model):
 class LotPondeuses(models.Model):
     nom = models.CharField(max_length=100)
 
-    # 🔥 NOUVEAU : Lien vers la ferme
+    # NOUVEAU : Lien vers la ferme
     ferme = models.ForeignKey(
         'accounts.Ferme',
         on_delete=models.CASCADE,
@@ -84,7 +84,7 @@ class LotPondeuses(models.Model):
         verbose_name_plural = "Lots de pondeuses"
         indexes = [
             models.Index(fields=['espece']),
-            models.Index(fields=['ferme']),  # 🔥 Index pour performance
+            models.Index(fields=['ferme']),  # Index pour performance
         ]
 
     def __str__(self):
@@ -146,6 +146,7 @@ class Animal(models.Model):
         User,
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name='animaux_crees'
     )
 
@@ -197,7 +198,7 @@ class Traitement(models.Model):
         related_name='traitements'
     )
 
-    # 🔥 NOUVEAU : Lien vers la ferme
+    # NOUVEAU : Lien vers la ferme
     ferme = models.ForeignKey(
         'accounts.Ferme',
         on_delete=models.CASCADE,
@@ -235,7 +236,7 @@ class Traitement(models.Model):
         indexes = [
             models.Index(fields=['date']),
             models.Index(fields=['type']),
-            models.Index(fields=['ferme']),  # 🔥 Index pour performance
+            models.Index(fields=['ferme']),  # Index pour performance
         ]
 
     def clean(self):

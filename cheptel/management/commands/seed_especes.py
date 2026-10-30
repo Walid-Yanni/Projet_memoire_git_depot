@@ -15,8 +15,8 @@ class Command(BaseCommand):
         for nom in especes:
             espece, created = Espece.objects.get_or_create(nom=nom)
             if created:
-                self.stdout.write(self.style.SUCCESS(f'✓ Espèce ajoutée : {nom}'))
+                self.stdout.write(self.style.SUCCESS(f'Espèce ajoutée : {nom}'))
             else:
                 self.stdout.write(f'• Espèce existante : {nom}')
         
-        self.stdout.write(self.style.SUCCESS('\n✅ Initialisation terminée !'))
+        self.stdout.write(self.style.SUCCESS('\nInitialisation terminée !'))

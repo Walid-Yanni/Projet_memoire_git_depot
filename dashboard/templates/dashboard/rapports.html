@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Rapports et exports{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Rapports et exports</h1><p>Synthèse mensuelle de l'activité sur 12 mois.</p></div>
+  <div class="page-actions">
+    <button class="btn btn-ghost" onclick="window.print()">{% icon "printer" 16 %}Imprimer / PDF</button>
+    <a class="btn btn-primary" href="{% url 'dashboard:rapports_export' %}">{% icon "file-spreadsheet" 16 %}Exporter en Excel</a>
+  </div>
+</div>
+<div class="card"><div class="table-wrap"><table class="tbl">
+  <thead><tr><th>Mois</th><th class="right">Œufs</th><th class="right">Morts</th><th class="right">Aliment moy.</th>{% if can_admin %}<th class="right">Recettes</th><th class="right">Dépenses</th><th class="right">Solde</th>{% endif %}</tr></thead>
+  <tbody>{% for l in lignes %}
+  <tr><td class="cell-main">{{ l.label }}</td><td class="right mono">{{ l.oeufs|num }}</td><td class="right mono">{{ l.morts }}</td><td class="right mono">{{ l.aliment|num:1 }} kg</td>
+  {% if can_admin %}<td class="right mono">{{ l.recettes|fcfa }}</td><td class="right mono">{{ l.depenses|fcfa }}</td><td class="right mono" style="font-weight:700;color:{% if l.solde >= 0 %}var(--brand-2){% else %}var(--danger){% endif %}">{{ l.solde|fcfa }}</td>{% endif %}</tr>
+  {% endfor %}</tbody></table></div></div>
+{% endblock %}

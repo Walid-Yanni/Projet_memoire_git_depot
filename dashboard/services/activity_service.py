@@ -18,7 +18,7 @@ def get_recent_activities(user):
         activites.append({
             'type': 'animal',
             'module': 'cheptel',
-            'action': '➕ Ajout animal',
+            'action': 'Ajout animal',
             'detail': f"{a.identifiant} - {a.nom or a.espece.nom}",
             'datetime': a.created_at,
             'date': a.created_at.date(),
@@ -34,7 +34,7 @@ def get_recent_activities(user):
         activites.append({
             'type': 'rapport',
             'module': 'cheptel',
-            'action': '📋 Rapport journalier',
+            'action': 'Rapport journalier',
             'detail': f"{r.oeufs_pondus} œufs, {r.nombre_morts} morts",
             'datetime': r.created_at,
             'date': r.created_at.date(),
@@ -50,7 +50,7 @@ def get_recent_activities(user):
         activites.append({
             'type': 'traitement',
             'module': 'cheptel',
-            'action': f"💊 {t.get_type_display()}",
+            'action': f"{t.get_type_display()}",
             'detail': f"{t.animal.identifiant} - {t.produit.nom}",
             'datetime': t.created_at,
             'date': t.created_at.date(),
@@ -63,12 +63,12 @@ def get_recent_activities(user):
     ).order_by('-created_at')[:4]
     
     for m in mouvements_recents:
-        direction = "📥 Entrée" if m.type == 'ENTREE' else "📤 Sortie"
+        direction = "Entrée" if m.type == 'ENTREE' else "Sortie"
         activites.append({
             'type': 'mouvement',
             'module': 'stock',
             'action': direction,
-            'detail': f"{m.produit.nom}: {m.quantite} {m.produit.get_unite_display()}",
+            'detail': f"{m.produit.nom}: {m.quantite.normalize():f} {m.produit.unite_courte}",
             'datetime': m.created_at,
             'date': m.created_at.date(),
             'heure': m.created_at.strftime('%H:%M')
@@ -83,14 +83,17 @@ def get_recent_activities(user):
         activites.append({
             'type': 'activite_agricole',
             'module': 'cultures',
-            'action': f"🚜 {a.get_type_display()}",
+            'action': f"{a.get_type_display()}",
             'detail': f"{a.culture_parcelle.culture.nom} - {a.culture_parcelle.parcelle.nom}",
             'datetime': a.created_at,
             'date': a.created_at.date(),
             'heure': a.created_at.strftime('%H:%M')
         })
     
-    # 🔥 TRI PAR DATETIME COMPLET (plus récent d'abord)
+    # TRI PAR DATETIME COMPLET (plus récent d'abord)
     activites.sort(key=lambda x: x['datetime'], reverse=True)
     
+    icons = {'animal': 'beef', 'rapport': 'clipboard-list', 'traitement': 'syringe', 'mouvement': 'boxes', 'activite_agricole': 'tractor'}
+    for a in activites:
+        a['icon'] = icons.get(a['type'], 'history')
     return activites[:20]  # Augmenté à 20 pour couvrir plus d'activités
