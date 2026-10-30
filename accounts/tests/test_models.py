@@ -51,7 +51,7 @@ class UserModelTest(TestCase):
         )
     
     def test_creation_employe_ok(self):
-        """Création d'un employé avec ferme → OK"""
+        """Création d'un employé avec ferme OK"""
         user = User.objects.create_user(
             username="jean",
             password="pass123",
@@ -64,7 +64,7 @@ class UserModelTest(TestCase):
         self.assertEqual(str(user), "jean (Employé)")
     
     def test_employe_sans_ferme_erreur(self):
-        """Un employé sans ferme → ValidationError"""
+        """Un employé sans ferme ValidationError"""
         user = User(
             username="pierre",
             email="pierre@ferme.com",
@@ -75,7 +75,7 @@ class UserModelTest(TestCase):
             user.full_clean()
     
     def test_creation_admin_ok(self):
-        """Création d'un admin avec ferme → OK"""
+        """Création d'un admin avec ferme OK"""
         admin = User.objects.create_user(
             username="admin1",
             password="pass123",
@@ -86,7 +86,7 @@ class UserModelTest(TestCase):
         self.assertEqual(admin.role, "ADMIN")
     
     def test_deux_admins_meme_ferme_erreur(self):
-        """Deux admins dans la même ferme → ValidationError"""
+        """Deux admins dans la même ferme ValidationError"""
         # Premier admin
         User.objects.create_user(
             username="admin1",
@@ -107,7 +107,7 @@ class UserModelTest(TestCase):
             user2.full_clean()
     
     def test_admins_fermes_differentes_ok(self):
-        """Deux admins dans des fermes différentes → OK"""
+        """Deux admins dans des fermes différentes OK"""
         ferme2 = Ferme.objects.create(
             nom="Ferme 2",
             localisation="Parakou",

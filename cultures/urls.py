@@ -14,7 +14,7 @@ urlpatterns = [
     # Cultures (liste globale)
     path('cultures/', views.culture_list, name='culture_list'),
     
-    # Association Culture ↔ Parcelle
+    # Association Culture Parcelle
     path('cultures-parcelles/', views.cultureparcelle_list, name='cultureparcelle_list'),
     path('cultures-parcelles/create/', views.cultureparcelle_create, name='cultureparcelle_create'),
     path('cultures-parcelles/<int:pk>/edit/', views.cultureparcelle_update, name='cultureparcelle_update'),

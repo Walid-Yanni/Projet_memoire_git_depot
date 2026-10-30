@@ -1,323 +1,114 @@
-﻿{% extends 'base.html' %}
-{% load static %}
-
-{% block title %}Dashboard - FermeApp{% endblock %}
-
-{% block extra_head %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<style>
-    /* ===== LAYOUT ===== */
-    .dashboard-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    
-    /* ===== ACTIONS RAPIDES ===== */
-    .quick-actions {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin-bottom: 25px;
-        padding: 15px;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    .btn-sm {
-        padding: 8px 16px;
-        font-size: 0.85rem;
-        border-radius: 8px;
-        background: #f0f2f5;
-        color: #2c3e50;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-    .btn-sm:hover {
-        background: #e0e4e8;
-        transform: translateY(-1px);
-    }
-    
-    /* ===== KPI GRID ===== */
-    .kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 15px;
-        margin-bottom: 30px;
-    }
-    .kpi-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 15px;
-        border-radius: 16px;
-        text-align: center;
-        transition: transform 0.2s;
-    }
-    .kpi-card:hover { transform: translateY(-3px); }
-    .kpi-card.kpi-danger { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
-    .kpi-icon { font-size: 1.6rem; margin-bottom: 5px; }
-    .kpi-value { font-size: 1.5rem; font-weight: bold; }
-    .kpi-label { font-size: 0.7rem; opacity: 0.9; margin-top: 5px; }
-    
-    /* ===== SANTÉ CARD ===== */
-    .health-card {
-        background: white;
-        border-radius: 16px;
-        padding: 15px;
-        text-align: center;
-        margin-bottom: 30px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    .health-success { border-left: 4px solid #27ae60; }
-    .health-warning { border-left: 4px solid #f39c12; }
-    .health-danger { border-left: 4px solid #e74c3c; }
-    .health-icon { font-size: 1.8rem; }
-    .health-value { font-size: 1.8rem; font-weight: bold; margin: 5px 0; }
-    
-    /* ===== FINANCES ===== */
-    .finances-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-        margin-bottom: 30px;
-    }
-    .finance-card {
-        background: white;
-        border-radius: 12px;
-        padding: 15px;
-        text-align: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    
-    /* ===== GRAPHIQUES ===== */
-    .charts-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-    .chart-card {
-        background: white;
-        border-radius: 16px;
-        padding: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-    .chart-card h3 { margin: 0 0 15px 0; color: #2c3e50; font-size: 1rem; }
-    canvas { max-height: 280px; width: 100%; }
-    
-    /* ===== ALERTES ===== */
-    .alertes-section {
-        background: white;
-        border-radius: 16px;
-        padding: 20px;
-        margin-bottom: 30px;
-    }
-    .alertes-section h3 { margin: 0 0 15px 0; }
-    .alerte-item {
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 10px;
-    }
-    .alerte-danger { background: #f8d7da; border-left: 4px solid #e74c3c; }
-    .alerte-warning { background: #fff3cd; border-left: 4px solid #f39c12; }
-    .alerte-info { background: #d1ecf1; border-left: 4px solid #3498db; }
-    
-    /* ===== ACTIVITÉS ===== */
-    .activites-section {
-        background: white;
-        border-radius: 16px;
-        padding: 20px;
-    }
-    .activite-item {
-        padding: 12px;
-        border-bottom: 1px solid #e2e8f0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    .activite-info { flex: 1; }
-    .activite-action { font-weight: 600; color: #2c3e50; }
-    .activite-detail { font-size: 0.85rem; color: #7f8c8d; }
-    .activite-date { font-size: 0.75rem; color: #95a5a6; text-align: right; }
-    .empty-state { text-align: center; padding: 40px; color: #7f8c8d; }
-    
-    @media (max-width: 768px) {
-        .charts-grid { grid-template-columns: 1fr; }
-        .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-        .activite-item { flex-direction: column; align-items: flex-start; }
-        .activite-date { text-align: left; }
-    }
-</style>
-{% endblock %}
-
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Tableau de bord{% endblock %}
 {% block content %}
-<div class="dashboard-container">
-    <h1>🏠 Tableau de bord</h1>
-    <p style="color: #7f8c8d; margin-bottom: 20px;">Bienvenue, {{ user.get_full_name|default:user.username }} !</p>
-    
-    <!-- ===== ACTIONS RAPIDES ===== -->
-    <div class="quick-actions">
-        <a href="{% url 'stocks:entree_create' %}" class="btn-sm">📥 Ajouter stock</a>
-        <a href="{% url 'stocks:sortie_create' %}" class="btn-sm">📤 Sortie stock</a>
-        <a href="{% url 'cheptel:rapport_list' %}" class="btn-sm">📋 Rapport journalier</a>
-        <a href="{% url 'cultures:activite_create' %}" class="btn-sm">🚜 Activité agricole</a>
-    </div>
-    
-    <!-- ===== KPIS (10 cartes) ===== -->
-    <div class="kpi-grid">
-        <!-- Cheptel -->
-        <div class="kpi-card"><div class="kpi-icon">🐄</div><div class="kpi-value">{{ kpis.total_animaux }}</div><div class="kpi-label">Total animaux</div></div>
-        <div class="kpi-card"><div class="kpi-icon">🟢</div><div class="kpi-value">{{ kpis.animaux_actifs }}</div><div class="kpi-label">Animaux actifs</div></div>
-        <div class="kpi-card"><div class="kpi-icon">🥚</div><div class="kpi-value">{{ kpis.oeufs_mois }}</div><div class="kpi-label">Œufs ce mois</div></div>
-        <div class="kpi-card"><div class="kpi-icon">📅</div><div class="kpi-value">{{ kpis.oeufs_aujourdhui }}</div><div class="kpi-label">Œufs aujourd'hui</div></div>
-        <div class="kpi-card"><div class="kpi-icon">💊</div><div class="kpi-value">{{ kpis.total_traitements }}</div><div class="kpi-label">Traitements</div></div>
-        <div class="kpi-card"><div class="kpi-icon">📋</div><div class="kpi-value">{{ kpis.total_rapports }}</div><div class="kpi-label">Rapports</div></div>
-        <!-- Stocks -->
-        <div class="kpi-card"><div class="kpi-icon">📦</div><div class="kpi-value">{{ kpis.total_produits }}</div><div class="kpi-label">Produits en stock</div></div>
-        <div class="kpi-card {% if kpis.produits_alerte > 0 %}kpi-danger{% endif %}"><div class="kpi-icon">⚠️</div><div class="kpi-value">{{ kpis.produits_alerte }}</div><div class="kpi-label">Produits en alerte</div></div>
-        <!-- Cultures -->
-        <div class="kpi-card"><div class="kpi-icon">🌱</div><div class="kpi-value">{{ kpis.cultures_en_cours }}</div><div class="kpi-label">Cultures en cours</div></div>
-        <div class="kpi-card"><div class="kpi-icon">📅</div><div class="kpi-value">{{ kpis.recoltes_prevues }}</div><div class="kpi-label">Récoltes prévues</div></div>
-    </div>
-    
-    <!-- ===== SANTÉ GLOBALE ===== -->
-    <div class="health-card health-{{ health_status.color }}">
-        <div class="health-icon">{{ health_status.icon }}</div>
-        <div class="health-value">{{ health_score }}%</div>
-        <div class="health-label">Santé globale - {{ health_status.label }}</div>
-    </div>
-    
-    <!-- ===== FINANCES ===== -->
-    <div class="finances-grid">
-        <div class="finance-card"><div>💰</div><div><strong>{{ finances.depenses|floatformat:0 }} CFA</strong></div><div>Dépenses (achats)</div></div>
-        <div class="finance-card"><div>📈</div><div><strong>{{ finances.marge|floatformat:0 }} CFA</strong></div><div>Marge estimée</div></div>
-    </div>
-    
-    <!-- ===== GRAPHIQUES ===== -->
-    <div class="charts-grid">
-        <div class="chart-card"><h3>📈 Évolution de la ponte</h3><canvas id="productionChart"></canvas></div>
-        <div class="chart-card"><h3>🥧 Animaux par espèce</h3><canvas id="especeChart"></canvas></div>
-        <div class="chart-card"><h3>📦 Évolution des stocks</h3><canvas id="stockChart"></canvas></div>
-        {% if depenses_par_produit.labels|length > 0 %}
-        <div class="chart-card"><h3>💰 Dépenses par produit</h3><canvas id="depensesChart"></canvas></div>
-        {% endif %}
-    </div>
-    
-    <!-- ===== ALERTES ===== -->
-    {% if alertes %}
-    <div class="alertes-section">
-        <h3>⚠️ Alertes ({{ alertes|length }})</h3>
-        {% for alerte in alertes %}
-        <div class="alerte-item alerte-{{ alerte.niveau }}">
-            <span>{{ alerte.message }}</span>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    
-    <!-- ===== ACTIVITÉS RÉCENTES ===== -->
-    <div class="activites-section">
-        <h3>📝 Dernières activités</h3>
-        {% if activites %}
-            {% for activite in activites %}
-            <div class="activite-item">
-                <div class="activite-info">
-                    <span class="activite-action">{{ activite.action }}</span>
-                    <span class="activite-detail">{{ activite.detail }}</span>
-                </div>
-                <div class="activite-date">{{ activite.date|date:"d/m/Y" }}<br>{{ activite.heure }}</div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty-state">Aucune activité récente</div>
-        {% endif %}
-    </div>
+<div class="page-head">
+  <div><h1>Bonjour, {{ request.user.first_name|default:request.user.username }}</h1>
+  <p>Voici l'état de {{ request.user.ferme.nom }} aujourd'hui, {% now "l j F Y" %}.</p></div>
+  <div class="page-actions">
+    {% if can_write %}<a class="btn btn-ghost" href="{% url 'cheptel:rapport_add' %}">{% icon "clipboard-list" 16 %}Rapport du jour</a><a class="btn btn-primary" href="{% url 'cheptel:animal_add' %}">{% icon "plus" 16 %}Ajouter un animal</a>{% endif %}
+  </div>
 </div>
 
-<!-- Données JSON pour les graphiques -->
-{{ production_data.dates|json_script:"production-dates" }}
-{{ production_data.valeurs|json_script:"production-valeurs" }}
-{{ animaux_par_espece.labels|json_script:"espece-labels" }}
-{{ animaux_par_espece.valeurs|json_script:"espece-valeurs" }}
-{{ stock_evolution.dates|json_script:"stock-dates" }}
-{{ stock_evolution.entrees|json_script:"stock-entrees" }}
-{{ stock_evolution.sorties|json_script:"stock-sorties" }}
-{{ depenses_par_produit.labels|json_script:"depenses-labels" }}
-{{ depenses_par_produit.valeurs|json_script:"depenses-valeurs" }}
+<div class="grid g4" style="margin-bottom:18px">
+  {% include "ui/_kpi.html" with label="Animaux actifs" value=kpis.animaux_actifs icon_name="beef" tone="t-green" foot="Enregistrés au total :" foot_val=kpis.total_animaux %}
+  {% include "ui/_kpi.html" with label="Œufs aujourd'hui" value=kpis.oeufs_aujourdhui|num icon_name="egg" tone="t-amber" foot="Ce mois :" foot_val=kpis.oeufs_mois %}
+  {% if can_admin %}{% include "ui/_kpi.html" with label="Solde 30 jours" value=finances.marge|fcfa icon_name="wallet" tone="t-blue" foot="Recettes moins dépenses" %}
+  {% else %}{% include "ui/_kpi.html" with label="Cultures en cours" value=kpis.cultures_en_cours icon_name="wheat" tone="t-blue" %}{% endif %}
+  {% include "ui/_kpi.html" with label="Stocks en alerte" value=kpis.produits_alerte icon_name="package" tone="t-red" foot="Produits suivis :" foot_val=kpis.total_produits %}
+</div>
+
+<div class="grid g-main" style="margin-bottom:18px">
+  <div class="card">
+    <div class="card-h"><div><h2>Production d'œufs</h2><div class="sub">30 derniers jours</div></div></div>
+    <div class="card-b"><div class="chart-box"><canvas id="chPonte"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="card-h"><div><h2>Santé de la ferme</h2><div class="sub">Indice global calculé</div></div></div>
+    <div class="card-b" style="text-align:center">
+      <div class="chart-box sm" style="max-width:220px;margin:0 auto"><canvas id="chScore"></canvas>
+        <div style="position:absolute;inset:0;display:grid;place-content:center"><div class="kpi-val" style="font-size:34px">{{ health_score }}<small>%</small></div></div></div>
+      <div style="margin-top:12px"><span class="badge {% if health_status.color == 'success' %}t-green{% elif health_status.color == 'warning' %}t-amber{% else %}t-red{% endif %}">{% icon health_status.icon 14 %}{{ health_status.label }}</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid g-main" style="margin-bottom:18px">
+  {% if can_admin %}
+  <div class="card">
+    <div class="card-h"><div><h2>Recettes et dépenses</h2><div class="sub">12 derniers mois, en FCFA</div></div><a class="btn btn-ghost btn-sm" href="{% url 'finances:transaction_list' %}">Détails{% icon "arrow-right" 14 %}</a></div>
+    <div class="card-b"><div class="chart-box"><canvas id="chFin"></canvas></div></div>
+  </div>
+  {% else %}
+  <div class="card"><div class="card-h"><h2>Mouvements de stock</h2></div><div class="card-b"><div class="chart-box"><canvas id="chStock"></canvas></div></div></div>
+  {% endif %}
+  <div class="card">
+    <div class="card-h"><div><h2>Répartition du cheptel</h2><div class="sub">Animaux actifs par espèce</div></div></div>
+    <div class="card-b"><div class="chart-box"><canvas id="chEsp"></canvas></div></div>
+  </div>
+</div>
+
+<div class="grid g2">
+  <div class="card">
+    <div class="card-h"><h2>Alertes</h2><span class="badge {% if alertes %}t-red{% else %}t-green{% endif %}">{{ alertes|length }}</span></div>
+    {% for a in alertes %}
+    <div class="list-row">
+      <span class="chip-ic {% if a.niveau == 'danger' %}t-red{% elif a.niveau == 'warning' %}t-amber{% else %}t-blue{% endif %}">{% icon a.icon 18 %}</span>
+      <div class="grow"><div class="t">{{ a.message }}</div><div class="s">{{ a.date|date:"d/m/Y" }}</div></div>
+    </div>
+    {% empty %}<div class="empty"><div class="ic-wrap">{% icon "badge-check" 26 %}</div><h3>Tout est en ordre</h3><p>Aucune alerte à signaler.</p></div>{% endfor %}
+  </div>
+  <div class="card">
+    <div class="card-h"><h2>Activité récente</h2></div>
+    {% for a in activites|slice:":8" %}
+    <div class="list-row">
+      <span class="chip-ic t-gray">{% icon a.icon 18 %}</span>
+      <div class="grow"><div class="t">{{ a.action }}</div><div class="s">{{ a.detail }}</div></div>
+      <span class="s">{{ a.date|date:"d/m" }} {{ a.heure }}</span>
+    </div>
+    {% empty %}<div class="empty"><p>Aucune activité enregistrée.</p></div>{% endfor %}
+  </div>
+</div>
+
+{{ production_data|json_script:"d-ponte" }}
+{{ animaux_par_espece|json_script:"d-esp" }}
+{{ finances.serie|json_script:"d-fin" }}
+{{ stock_evolution|json_script:"d-stock" }}
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-    // Graphique 1 : Production œufs
-    new Chart(document.getElementById('productionChart'), {
-        type: 'line',
-        data: {
-            labels: JSON.parse(document.getElementById('production-dates').textContent || '[]'),
-            datasets: [{
-                label: 'Œufs pondus',
-                data: JSON.parse(document.getElementById('production-valeurs').textContent || '[]'),
-                borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: { responsive: true, maintainAspectRatio: true }
-    });
-    
-    // Graphique 2 : Animaux par espèce
-    new Chart(document.getElementById('especeChart'), {
-        type: 'pie',
-        data: {
-            labels: JSON.parse(document.getElementById('espece-labels').textContent || '[]'),
-            datasets: [{
-                data: JSON.parse(document.getElementById('espece-valeurs').textContent || '[]'),
-                backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a']
-            }]
-        },
-        options: { responsive: true, maintainAspectRatio: true }
-    });
-    
-    // Graphique 3 : Évolution des stocks
-    const stockDates = JSON.parse(document.getElementById('stock-dates').textContent || '[]');
-    const stockEntrees = JSON.parse(document.getElementById('stock-entrees').textContent || '[]');
-    const stockSorties = JSON.parse(document.getElementById('stock-sorties').textContent || '[]');
-    
-    if (stockDates.length > 0) {
-        new Chart(document.getElementById('stockChart'), {
-            type: 'bar',
-            data: {
-                labels: stockDates,
-                datasets: [
-                    { label: '📥 Entrées', data: stockEntrees, backgroundColor: 'rgba(39, 174, 96, 0.6)', borderColor: '#27ae60', borderWidth: 1 },
-                    { label: '📤 Sorties', data: stockSorties, backgroundColor: 'rgba(231, 76, 60, 0.6)', borderColor: '#e74c3c', borderWidth: 1 }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true } } }
-        });
-    }
-    
-    // Graphique 4 : Dépenses par produit
-    const depensesLabels = JSON.parse(document.getElementById('depenses-labels').textContent || '[]');
-    const depensesValeurs = JSON.parse(document.getElementById('depenses-valeurs').textContent || '[]');
-    
-    if (depensesLabels.length > 0) {
-        new Chart(document.getElementById('depensesChart'), {
-            type: 'bar',
-            data: {
-                labels: depensesLabels,
-                datasets: [{
-                    label: 'Dépenses (CFA)',
-                    data: depensesValeurs,
-                    backgroundColor: 'rgba(52, 152, 219, 0.6)',
-                    borderColor: '#3498db',
-                    borderWidth: 1
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true } } }
-        });
-    }
+(function () {
+  var G = '#16a34a', GL = '#86efac', BLUE = '#2563eb', AMB = '#d97706', INK = '#8493a8', GRID = '#eef1f6';
+  var get = function (id) { var e = document.getElementById(id); return e ? JSON.parse(e.textContent) : null; };
+  Chart.defaults.font.family = "'DM Sans', sans-serif"; Chart.defaults.color = INK;
+  Chart.defaults.plugins.legend.labels.usePointStyle = true; Chart.defaults.plugins.legend.labels.boxWidth = 8;
+  var scales = { x: { grid: { display: false }, ticks: { maxTicksLimit: 12, maxRotation: 0 } }, y: { grid: { color: GRID }, border: { display: false }, beginAtZero: true } };
+  var fmt = function (v) { return new Intl.NumberFormat('fr-FR').format(v); };
+
+  var p = get('d-ponte'); if (p) {
+    var ctx = document.getElementById('chPonte').getContext('2d');
+    var g = ctx.createLinearGradient(0, 0, 0, 280); g.addColorStop(0, 'rgba(22,163,74,.28)'); g.addColorStop(1, 'rgba(22,163,74,0)');
+    new Chart(ctx, { type: 'line', data: { labels: p.dates, datasets: [{ label: 'Œufs', data: p.valeurs, borderColor: G, backgroundColor: g, fill: true, tension: .35, pointRadius: 0, pointHoverRadius: 5, borderWidth: 2.5 }] },
+      options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { return fmt(c.parsed.y) + ' œufs'; } } } }, scales: scales, interaction: { mode: 'index', intersect: false } } });
+  }
+  var s = {{ health_score|default:0 }};
+  new Chart(document.getElementById('chScore'), { type: 'doughnut', data: { datasets: [{ data: [s, 100 - s], backgroundColor: [s >= 80 ? G : (s >= 50 ? AMB : '#dc2626'), '#eef1f6'], borderWidth: 0, cutout: '78%' }] }, options: { maintainAspectRatio: false, plugins: { tooltip: { enabled: false } } } });
+
+  var e = get('d-esp'); if (e) {
+    new Chart(document.getElementById('chEsp'), { type: 'doughnut', data: { labels: e.labels, datasets: [{ data: e.valeurs, backgroundColor: [G, BLUE, AMB, '#7c3aed', '#0d9488', '#94a3b8'], borderWidth: 2, borderColor: '#fff' }] },
+      options: { maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom' } } } });
+  }
+  var f = get('d-fin'); if (f && document.getElementById('chFin')) {
+    new Chart(document.getElementById('chFin'), { type: 'bar', data: { labels: f.map(function (x) { return x.label; }), datasets: [
+      { label: 'Recettes', data: f.map(function (x) { return x.recettes; }), backgroundColor: G, borderRadius: 5 },
+      { label: 'Dépenses', data: f.map(function (x) { return x.depenses; }), backgroundColor: '#cbd5e1', borderRadius: 5 }] },
+      options: { maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: function (c) { return c.dataset.label + ' : ' + fmt(c.parsed.y) + ' FCFA'; } } } }, scales: scales } });
+  }
+  var st = get('d-stock'); if (st && document.getElementById('chStock')) {
+    new Chart(document.getElementById('chStock'), { type: 'bar', data: { labels: st.dates, datasets: [{ label: 'Entrées', data: st.entrees, backgroundColor: G, borderRadius: 5 }, { label: 'Sorties', data: st.sorties, backgroundColor: AMB, borderRadius: 5 }] }, options: { maintainAspectRatio: false, scales: scales } });
+  }
+})();
 </script>
 {% endblock %}

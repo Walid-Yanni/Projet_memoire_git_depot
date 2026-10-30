@@ -22,7 +22,7 @@ class ProduitStock(models.Model):
     unite = models.CharField(max_length=20, choices=UNITE_CHOICES, default='KG')
     emplacement = models.CharField(max_length=100, blank=True)
     
-    # 🔥 DecimalField au lieu de FloatField
+    # DecimalField au lieu de FloatField
     quantite_actuelle = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     seuil_alerte = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     
@@ -43,6 +43,16 @@ class ProduitStock(models.Model):
         ]
         unique_together = [['ferme', 'nom']]
     
+    UNITES_COURTES = {'KG': 'kg', 'L': 'L', 'SAC': 'sac(s)', 'BONBONNE': 'bonbonne(s)', 'UNITE': 'u.'}
+
+    @property
+    def unite_courte(self):
+        return self.UNITES_COURTES.get(self.unite, self.unite)
+
+    @property
+    def quantite_txt(self):
+        return f"{self.quantite_actuelle.normalize():f}"
+
     def est_en_alerte(self):
         return self.quantite_actuelle <= self.seuil_alerte
     
@@ -54,8 +64,8 @@ class MouvementStock(models.Model):
     """Cœur du module - Source de vérité"""
     
     TYPE_CHOICES = [
-        ('ENTREE', '📥 Entrée (achat, production)'),
-        ('SORTIE', '📤 Sortie (consommation, vente)'),
+        ('ENTREE', 'Entrée (achat, production)'),
+        ('SORTIE', 'Sortie (consommation, vente)'),
     ]
     
     produit = models.ForeignKey(
@@ -71,10 +81,10 @@ class MouvementStock(models.Model):
     motif = models.CharField(max_length=200, blank=True)
     reference = models.CharField(max_length=100, blank=True)
     
-    # 🔥 Pour dashboard financier
+    # Pour dashboard financier
     prix_unitaire = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     
-    # 🔥 Traçabilité complète
+    # Traçabilité complète
     stock_avant = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     stock_apres = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     

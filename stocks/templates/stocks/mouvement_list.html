@@ -1,113 +1,34 @@
-<!-- stocks/templates/stocks/mouvement_list.html -->
-{% extends 'stocks/base_stocks.html' %}
-
-{% block stocks_content %}
-<div class="page-header">
-    <h1>📊 Historique des mouvements</h1>
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Mouvements de stock{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Mouvements de stock</h1><p>Historique complet et traçable des entrées et sorties.</p></div>
+  <div class="page-actions">{% if can_write %}<a class="btn btn-ghost" href="{% url 'stocks:sortie_create' %}">{% icon "upload" 16 %}Sortie</a><a class="btn btn-primary" href="{% url 'stocks:entree_create' %}">{% icon "download" 16 %}Entrée</a>{% endif %}</div>
 </div>
-
-<!-- Filtres -->
-<div class="filters-card">
-    <form method="get" class="filters-form">
-        <div class="form-group">
-            <label for="{{ filter_form.produit.id_for_label }}">Produit</label>
-            {{ filter_form.produit }}
-        </div>
-        <div class="form-group">
-            <label for="{{ filter_form.type.id_for_label }}">Type</label>
-            {{ filter_form.type }}
-        </div>
-        <div class="form-group">
-            <label for="{{ filter_form.date_debut.id_for_label }}">Date début</label>
-            {{ filter_form.date_debut }}
-        </div>
-        <div class="form-group">
-            <label for="{{ filter_form.date_fin.id_for_label }}">Date fin</label>
-            {{ filter_form.date_fin }}
-        </div>
-        <div class="filter-actions">
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-            <a href="{% url 'stocks:mouvement_list' %}" class="btn btn-secondary">Réinitialiser</a>
-        </div>
-    </form>
+{% include "stocks/_tabs.html" %}
+<div class="card">
+  <form class="toolbar" method="get">
+    <div style="min-width:170px">{{ filter_form.produit }}</div>
+    <div style="min-width:140px">{{ filter_form.type }}</div>
+    <div>{{ filter_form.date_debut }}</div><div>{{ filter_form.date_fin }}</div>
+    <button class="btn btn-ghost btn-sm" type="submit">{% icon "filter" 14 %}Filtrer</button>
+  </form>
+  {% if mouvements %}
+  <div class="table-wrap"><table class="tbl">
+    <thead><tr><th>Date</th><th>Produit</th><th>Type</th><th class="right">Quantité</th><th class="right">Stock après</th><th>Motif</th><th></th></tr></thead>
+    <tbody>{% for m in mouvements %}
+    <tr>
+      <td class="nowrap">{{ m.date|date:"d/m/Y" }}</td>
+      <td><div class="cell-main">{{ m.produit.nom }}</div><div class="cell-sub">{{ m.created_by.get_full_name|default:m.created_by.username }}</div></td>
+      <td><span class="badge {% if m.type == 'ENTREE' %}t-green{% else %}t-amber{% endif %}">{% if m.type == 'ENTREE' %}{% icon "arrow-down-right" 13 %}Entrée{% else %}{% icon "arrow-up-right" 13 %}Sortie{% endif %}</span></td>
+      <td class="right mono" style="font-weight:600">{% if m.type == 'ENTREE' %}+{% else %}-{% endif %}{{ m.quantite|num:0 }}</td>
+      <td class="right mono muted">{{ m.stock_apres|num:0 }}</td>
+      <td class="muted">{{ m.motif|default:"-" }}</td>
+      <td><div class="row-actions">{% if can_admin %}<a class="btn del" href="{% url 'stocks:mouvement_delete' m.pk %}">{% icon "trash-2" 16 %}</a>{% endif %}</div></td>
+    </tr>{% endfor %}</tbody></table></div>
+  <div class="pager"><span>Page {{ mouvements.number }} sur {{ mouvements.paginator.num_pages }}</span>
+    <span style="display:flex;gap:6px">{% if mouvements.has_previous %}<a class="btn btn-ghost btn-sm" href="{% qs page=mouvements.previous_page_number %}">Précédent</a>{% endif %}{% if mouvements.has_next %}<a class="btn btn-ghost btn-sm" href="{% qs page=mouvements.next_page_number %}">Suivant</a>{% endif %}</span></div>
+  {% else %}{% include "ui/_empty.html" with icon_name="history" title="Aucun mouvement" text="Aucun mouvement ne correspond à ces filtres." %}{% endif %}
 </div>
-
-{% if mouvements %}
-<div class="mouvements-table">
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Produit</th>
-                <th>Type</th>
-                <th>Quantité</th>
-                <th>Référence</th>
-                <th>Motif</th>
-                <th>Opérateur</th>
-                {% if request.user.role == "ADMIN" %}<th>Actions</th>{% endif %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for mouvement in mouvements %}
-            <tr>
-                <td>{{ mouvement.date|date:"d/m/Y" }}</td>
-                <td>{{ mouvement.produit.nom }}</td>
-                <td>
-                    <span class="{% if mouvement.type == 'ENTREE' %}entree{% else %}sortie{% endif %}">
-                        {% if mouvement.type == 'ENTREE' %}📥 Entrée{% else %}📤 Sortie{% endif %}
-                    </span>
-                </td>
-                <td class="{% if mouvement.type == 'ENTREE' %}entree{% else %}sortie{% endif %}">
-                    {% if mouvement.type == 'ENTREE' %}+{% else %}-{% endif %}
-                    {{ mouvement.quantite }} {{ mouvement.produit.get_unite_display }}
-                </td>
-                <td>{{ mouvement.reference|default:"-" }}</td>
-                <td>{{ mouvement.motif|truncatechars:50|default:"-" }}</td>
-                <td>{{ mouvement.created_by.get_full_name|default:mouvement.created_by.username }}</td>
-                {% if request.user.role == "ADMIN" %}
-                <td>
-                    <a href="{% url 'stocks:mouvement_delete' mouvement.pk %}" class="btn-icon delete" 
-                       onclick="return confirm('Supprimer ce mouvement ? Le stock sera automatiquement corrigé.')">
-                        🗑️
-                    </a>
-                </td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<!-- Pagination -->
-{% if mouvements.has_other_pages %}
-<div class="pagination">
-    {% if mouvements.has_previous %}
-        <a href="?page=1{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn-page">«</a>
-        <a href="?page={{ mouvements.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn-page">‹</a>
-    {% endif %}
-    
-    <span class="page-current">
-        Page {{ mouvements.number }} / {{ mouvements.paginator.num_pages }}
-    </span>
-    
-    {% if mouvements.has_next %}
-        <a href="?page={{ mouvements.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn-page">›</a>
-        <a href="?page={{ mouvements.paginator.num_pages }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn-page">»</a>
-    {% endif %}
-</div>
-{% endif %}
-
-{% else %}
-<div class="empty-state">
-    <div class="empty-icon">📊</div>
-    <h3>Aucun mouvement</h3>
-    <p>Enregistrez vos premières entrées ou sorties de stock.</p>
-    {% if request.user.role == "ADMIN" %}
-    <div style="display: flex; gap: 15px; justify-content: center;">
-        <a href="{% url 'stocks:entree_create' %}" class="btn btn-success">📥 Ajouter une entrée</a>
-        <a href="{% url 'stocks:sortie_create' %}" class="btn btn-danger">📤 Ajouter une sortie</a>
-    </div>
-    {% endif %}
-</div>
-{% endif %}
 {% endblock %}

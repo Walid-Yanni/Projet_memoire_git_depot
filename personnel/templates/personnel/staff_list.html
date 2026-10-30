@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Personnel{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Personnel</h1><p>Comptes de l'équipe et niveaux d'accès.</p></div>
+  <div class="page-actions">{% if can_admin %}<a class="btn btn-primary" href="{% url 'personnel:staff_create' %}">{% icon "plus" 16 %}Nouvel employé</a>{% endif %}</div>
+</div>
+<div class="card">
+  <div class="table-wrap"><table class="tbl">
+    <thead><tr><th>Membre</th><th>Rôle</th><th>Contact</th><th>Statut</th><th></th></tr></thead>
+    <tbody>{% for u in equipe %}
+    <tr>
+      <td><div style="display:flex;gap:12px;align-items:center"><span class="avatar">{{ u|initials }}</span><div><div class="cell-main">{{ u.get_full_name|default:u.username }}</div><div class="cell-sub">@{{ u.username }}</div></div></div></td>
+      <td><span class="badge {% if u.role == 'ADMIN' %}t-violet{% else %}t-blue{% endif %}">{{ u.get_role_display }}</span></td>
+      <td>{{ u.phone|default:"-" }}<div class="cell-sub">{{ u.adresse }}</div></td>
+      <td><span class="badge {% if u.is_active %}t-green{% else %}t-gray{% endif %}"><i class="dot"></i>{% if u.is_active %}Actif{% else %}Désactivé{% endif %}</span></td>
+      <td><div class="row-actions">{% if can_admin and u.role == 'EMPLOYE' %}<a class="btn" href="{% url 'personnel:staff_edit' u.pk %}">{% icon "pencil" 16 %}</a>{% endif %}</div></td>
+    </tr>{% endfor %}</tbody></table></div>
+</div>
+{% endblock %}

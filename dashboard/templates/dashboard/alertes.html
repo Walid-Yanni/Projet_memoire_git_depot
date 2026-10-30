@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Alertes{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Centre d'alertes</h1><p>Tout ce qui demande votre attention, classé par urgence.</p></div></div>
+<div class="card">
+  {% for a in alertes %}
+  <div class="list-row">
+    <span class="chip-ic {% if a.niveau == 'danger' %}t-red{% elif a.niveau == 'warning' %}t-amber{% else %}t-blue{% endif %}">{% icon a.icon 18 %}</span>
+    <div class="grow"><div class="t">{{ a.message }}</div><div class="s">{{ a.date|date:"d/m/Y" }}</div></div>
+    <span class="badge {% if a.niveau == 'danger' %}t-red{% elif a.niveau == 'warning' %}t-amber{% else %}t-blue{% endif %}">{% if a.niveau == 'danger' %}Urgent{% elif a.niveau == 'warning' %}À surveiller{% else %}Information{% endif %}</span>
+  </div>
+  {% empty %}<div class="empty"><div class="ic-wrap">{% icon "badge-check" 26 %}</div><h3>Aucune alerte</h3><p>Tout est en ordre sur la ferme.</p></div>{% endfor %}
+</div>
+{% endblock %}

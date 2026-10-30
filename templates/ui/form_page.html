@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}{{ title|default:"Formulaire" }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ title|default:"Formulaire" }}</h1>
+    {% block subtitle %}{% endblock %}
+  </div>
+  <div class="page-actions"><a class="btn btn-ghost" href="{% block back_url %}javascript:history.back(){% endblock %}">{% icon "chevron-left" 16 %}Retour</a></div>
+</div>
+{% if is_visiteur %}<div class="banner info" style="margin-bottom:18px">{% icon "eye" 18 %}<span>Mode démonstration : vous pouvez explorer ce formulaire, mais aucune donnée ne sera enregistrée.</span></div>{% endif %}
+<form method="post" {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} class="card form-card" novalidate>
+  {% csrf_token %}
+  <div class="card-b">
+    {% if form.non_field_errors %}<div class="banner" style="background:var(--danger-soft);color:var(--danger);margin-bottom:18px">{% icon "circle-alert" 18 %}<div>{{ form.non_field_errors }}</div></div>{% endif %}
+    <div class="form-grid">
+      {% for field in form.visible_fields %}
+      <div class="field {% if field.errors %}has-err{% endif %} {% if field.field.widget.input_type == 'textarea' or field.name == 'notes' or field.name == 'description' %}full{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span style="color:var(--danger)">*</span>{% endif %}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+        {% for e in field.errors %}<div class="err">{{ e }}</div>{% endfor %}
+      </div>
+      {% endfor %}
+      {% for h in form.hidden_fields %}{{ h }}{% endfor %}
+    </div>
+    <div class="form-actions">
+      <a class="btn btn-ghost" href="{% block cancel_url %}javascript:history.back(){% endblock %}">Annuler</a>
+      <button class="btn btn-primary" type="submit">{% icon "check" 16 %}{{ button_text|default:"Enregistrer" }}</button>
+    </div>
+  </div>
+</form>
+{% endblock %}

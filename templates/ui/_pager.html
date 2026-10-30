@@ -1,0 +1,8 @@
+{% load ui %}{% if is_paginated %}
+<div class="pager">
+  <span>Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }} · {{ page_obj.paginator.count }} résultat{{ page_obj.paginator.count|pluralize }}</span>
+  <span style="display:flex;gap:6px">
+    {% if page_obj.has_previous %}<a class="btn btn-ghost btn-sm" href="{% qs page=page_obj.previous_page_number %}">{% icon "chevron-left" 15 %}Précédent</a>{% endif %}
+    {% if page_obj.has_next %}<a class="btn btn-ghost btn-sm" href="{% qs page=page_obj.next_page_number %}">Suivant{% icon "chevron-right" 15 %}</a>{% endif %}
+  </span>
+</div>{% endif %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Stocks et intrants{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Stocks et intrants</h1><p>Niveaux actuels, seuils d'alerte et mouvements.</p></div>
+  <div class="page-actions">
+    {% if can_write %}<a class="btn btn-ghost" href="{% url 'stocks:sortie_create' %}">{% icon "upload" 16 %}Sortie</a><a class="btn btn-primary" href="{% url 'stocks:entree_create' %}">{% icon "download" 16 %}Entrée</a>{% endif %}
+  </div>
+</div>
+{% include "stocks/_tabs.html" %}
+<div class="grid g3" style="margin-bottom:18px">
+  {% include "ui/_kpi.html" with label="Produits suivis" value=total_produits icon_name="boxes" tone="t-blue" %}
+  {% include "ui/_kpi.html" with label="Sous le seuil" value=produits_en_alerte icon_name="triangle-alert" tone="t-red" foot="Réapprovisionnement conseillé" %}
+  {% include "ui/_kpi.html" with label="Références saines" value=total_produits_ok icon_name="badge-check" tone="t-green" %}
+</div>
+<div class="card">
+  <div class="card-h"><h2>Niveaux de stock</h2><a class="btn btn-ghost btn-sm" href="{% url 'stocks:produit_list' %}">Gérer les produits{% icon "arrow-right" 14 %}</a></div>
+  {% for p in aliments %}
+  <div class="list-row">
+    <span class="chip-ic {% if p.est_en_alerte %}t-red{% else %}t-green{% endif %}">{% icon "package" 18 %}</span>
+    <div class="grow">
+      <div style="display:flex;justify-content:space-between;gap:12px"><span class="t">{{ p.nom }}</span><span class="mono" style="font-weight:600">{{ p.quantite_actuelle|num:0 }} <span class="muted">{{ p.unite_courte }}</span></span></div>
+      <div class="progress {% if p.est_en_alerte %}danger{% endif %}" style="margin-top:7px"><i style="width:{{ p.pct }}%"></i></div>
+      <div class="s" style="margin-top:4px">Seuil d'alerte : {{ p.seuil_alerte|num:0 }}{% if p.emplacement %} · {{ p.emplacement }}{% endif %}</div>
+    </div>
+  </div>
+  {% empty %}{% include "ui/_empty.html" with icon_name="boxes" title="Aucun produit" text="Ajoutez un produit pour suivre son stock." %}{% endfor %}
+</div>
+{% endblock %}

@@ -42,11 +42,9 @@ class StockViewsTest(TestCase):
         request._messages = FallbackStorage(request)
         return request
 
-    def test_stock_dashboard_and_partials_render(self):
+    def test_stock_dashboard_renders(self):
         view_calls = [
             (views.stock_dashboard, reverse("stocks:dashboard")),
-            (views.aliments_partial, reverse("stocks:aliments_partial")),
-            (views.semences_partial, reverse("stocks:semences_partial")),
         ]
 
         for view, url in view_calls:

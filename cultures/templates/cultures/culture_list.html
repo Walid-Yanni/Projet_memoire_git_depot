@@ -1,37 +1,14 @@
-<!-- cultures/templates/cultures/culture_list.html -->
-{% extends 'cultures/base_cultures.html' %}
-
-{% block cultures_content %}
-<div class="page-header">
-    <h1>🌽 Catalogue des cultures</h1>
-</div>
-
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Catalogue des cultures{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Catalogue des cultures</h1><p>Espèces cultivables et nombre de parcelles concernées.</p></div></div>
+{% include "cultures/_tabs.html" %}
+<div class="card">
 {% if cultures %}
-<div class="cultures-grid">
-    {% for culture in cultures %}
-    <div class="culture-card">
-        <div class="culture-icon">
-            {% if culture.nom == "Maïs" %}🌽
-            {% elif culture.nom == "Riz" %}🍚
-            {% elif culture.nom == "Tomate" %}🍅
-            {% elif culture.nom == "Manioc" %}🍠
-            {% elif culture.nom == "Soja" %}🫘
-            {% elif culture.nom == "Haricot" %}🫘
-            {% elif culture.nom == "Arachide" %}🥜
-            {% elif culture.nom == "Piment" %}🌶️
-            {% else %}🌱
-            {% endif %}
-        </div>
-        <h3>{{ culture.nom }}</h3>
-        <p class="culture-count">{{ culture.parcelles_associees.count }} parcelle(s)</p>
-    </div>
-    {% endfor %}
+  {% for c in cultures %}
+  <div class="list-row"><span class="chip-ic t-green">{% icon "leaf" 18 %}</span><div class="grow"><div class="t">{{ c.nom }}</div></div><span class="badge t-gray">{{ c.parcelles_count }} parcelle{{ c.parcelles_count|pluralize }}</span></div>
+  {% endfor %}
+{% else %}{% include "ui/_empty.html" with icon_name="leaf" title="Catalogue vide" text="Aucune culture enregistrée." %}{% endif %}
 </div>
-{% else %}
-<div class="empty-state">
-    <div class="empty-icon">🌽</div>
-    <h3>Aucune culture</h3>
-    <p>Les cultures seront préchargées dans le système.</p>
-</div>
-{% endif %}
 {% endblock %}

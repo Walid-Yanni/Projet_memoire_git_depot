@@ -17,10 +17,10 @@ class StockService:
     def creer_mouvement(produit_id, type_mouvement, quantite, user, **kwargs):
         """
         Crée un mouvement de stock avec verrouillage de ligne.
-        🔥 Utilise select_for_update() pour éviter les races conditions.
+        Utilise select_for_update() pour éviter les races conditions.
         """
         
-        # 🔥 Verrouillage de la ligne en base (prévention concurrence)
+        # Verrouillage de la ligne en base (prévention concurrence)
         produit = ProduitStock.objects.select_for_update().get(id=produit_id)
         
         # Validation
@@ -64,7 +64,7 @@ class StockService:
     def annuler_mouvement(mouvement_id, user):
         """
         Annule un mouvement existant en créant un mouvement inverse.
-        🔥 Alternative à la suppression : traçabilité totale.
+        Alternative à la suppression : traçabilité totale.
         """
         mouvement = MouvementStock.objects.select_for_update().get(id=mouvement_id)
         
@@ -82,7 +82,7 @@ class StockService:
     @staticmethod
     def get_stock_calcule(produit_id):
         """
-        🔥 Option expert : recalcule le stock à partir des mouvements.
+        Option expert : recalcule le stock à partir des mouvements.
         Permet un audit en cas de doute sur l'intégrité des données.
         """
         from django.db.models import Sum

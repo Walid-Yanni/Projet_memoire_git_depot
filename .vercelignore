@@ -1,0 +1,12 @@
+.venv*/
+.env
+.env.*
+dumps/
+*.sqlite3
+media/
+staticfiles/
+.git/
+.github/
+*.docx
+*.zip
+__pycache__/

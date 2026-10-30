@@ -1,6 +1,11 @@
 # dashboard/views.py
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.views.generic import TemplateView
+from datetime import date
+from . import reports
 from django.core.cache import cache
 from .services import (
     get_kpis,
@@ -24,7 +29,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         
-        # 🔥 CACHE (60 secondes pour éviter les calculs trop fréquents)
+        # CACHE (60 secondes pour éviter les calculs trop fréquents)
         cache_key = f"dashboard_v2_{user.id}_{user.ferme.id}"
         data = cache.get(cache_key)
         
@@ -49,3 +54,21 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         
         context.update(data)
         return context
+
+
+@login_required
+def alertes(request):
+    return render(request, 'dashboard/alertes.html', {'alertes': get_alertes(request.user, limit=100)})
+
+
+@login_required
+def rapports(request):
+    return render(request, 'dashboard/rapports.html', {'lignes': reports.synthese_mensuelle(request.user.ferme)})
+
+
+@login_required
+def rapports_export(request):
+    resp = HttpResponse(reports.export_xlsx(request.user.ferme, with_finances=request.user.role != 'EMPLOYE'),
+                        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    resp['Content-Disposition'] = f'attachment; filename="fermeapp_synthese_{date.today():%Y%m%d}.xlsx"'
+    return resp

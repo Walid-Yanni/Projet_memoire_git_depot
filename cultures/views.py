@@ -30,7 +30,7 @@ def parcelle_create(request):
             parcelle = form.save(commit=False)
             parcelle.ferme = request.user.ferme
             parcelle.save()
-            messages.success(request, "✅ Parcelle créée avec succès.")
+            messages.success(request, "Parcelle créée avec succès.")
             return redirect('cultures:parcelle_list')
     else:
         form = ParcelleForm()
@@ -46,7 +46,7 @@ def parcelle_update(request, pk):
         form = ParcelleForm(request.POST, instance=parcelle)
         if form.is_valid():
             form.save()
-            messages.success(request, "✏️ Parcelle mise à jour.")
+            messages.success(request, "Parcelle mise à jour.")
             return redirect('cultures:parcelle_list')
     else:
         form = ParcelleForm(instance=parcelle)
@@ -60,7 +60,7 @@ def parcelle_delete(request, pk):
     
     if request.method == 'POST':
         parcelle.delete()
-        messages.success(request, "🗑️ Parcelle supprimée.")
+        messages.success(request, "Parcelle supprimée.")
         return redirect('cultures:parcelle_list')
     
     return render(request, 'cultures/parcelle_confirm_delete.html', {'object': parcelle})
@@ -80,7 +80,7 @@ def culture_list(request):
 
 
 # ==============================
-# ASSOCIATIONS CULTURE ↔ PARCELLE
+# ASSOCIATIONS CULTURE PARCELLE
 # ==============================
 
 @login_required
@@ -99,7 +99,7 @@ def cultureparcelle_create(request):
         form = CultureParcelleForm(request.POST, user=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, "✅ Culture associée à la parcelle.")
+            messages.success(request, "Culture associée à la parcelle.")
             return redirect('cultures:cultureparcelle_list')
     else:
         form = CultureParcelleForm(user=request.user)
@@ -119,7 +119,7 @@ def cultureparcelle_update(request, pk):
         form = CultureParcelleForm(request.POST, instance=culture_parcelle, user=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, "✏️ Association mise à jour.")
+            messages.success(request, "Association mise à jour.")
             return redirect('cultures:cultureparcelle_list')
     else:
         form = CultureParcelleForm(instance=culture_parcelle, user=request.user)
@@ -137,7 +137,7 @@ def cultureparcelle_delete(request, pk):
     
     if request.method == 'POST':
         culture_parcelle.delete()
-        messages.success(request, "🗑️ Association supprimée.")
+        messages.success(request, "Association supprimée.")
         return redirect('cultures:cultureparcelle_list')
     
     return render(request, 'cultures/cultureparcelle_confirm_delete.html', {'object': culture_parcelle})
@@ -168,7 +168,7 @@ def activite_create(request):
             activite = form.save(commit=False)
             activite.operateur = request.user
             activite.save()
-            messages.success(request, "✅ Activité enregistrée.")
+            messages.success(request, "Activité enregistrée.")
             return redirect('cultures:activite_list')
     else:
         form = ActiviteAgricoleForm(user=request.user)
@@ -186,7 +186,7 @@ def activite_delete(request, pk):
     
     if request.method == 'POST':
         activite.delete()
-        messages.success(request, "🗑️ Activité supprimée.")
+        messages.success(request, "Activité supprimée.")
         return redirect('cultures:activite_list')
     
     return render(request, 'cultures/activite_confirm_delete.html', {'object': activite})

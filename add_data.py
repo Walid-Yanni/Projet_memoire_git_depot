@@ -84,9 +84,9 @@ for data in animals_data:
     )
     if created:
         created_animals.append(animal)
-        print(f"✓ Animal créé: {animal.nom} ({animal.numero_identification})")
+        print(f"Animal créé: {animal.nom} ({animal.numero_identification})")
     else:
-        print(f"✗ Animal existe déjà: {animal.nom}")
+        print(f"Animal existe déjà: {animal.nom}")
 
 # Ajouter des traitements d'exemple
 treatments = [
@@ -138,8 +138,8 @@ for treatment_data in treatments:
             }
         )
         if created:
-            print(f"✓ Traitement ajouté: {animal.nom} - {traitement.get_type_traitement_display()}")
+            print(f"Traitement ajouté: {animal.nom} - {traitement.get_type_traitement_display()}")
     except Exception as e:
-        print(f"✗ Erreur: {e}")
+        print(f"Erreur: {e}")
 
-print("\n✅ Données d'exemple ajoutées avec succès!")
+print("\nDonnées d'exemple ajoutées avec succès!")

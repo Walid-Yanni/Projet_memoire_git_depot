@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Tâches{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Tâches</h1><p>Organisation du travail de l'équipe, de l'idée à la réalisation.</p></div>
+  <div class="page-actions">{% if can_write %}<a class="btn btn-primary" href="{% url 'taches:tache_create' %}">{% icon "plus" 16 %}Nouvelle tâche</a>{% endif %}</div>
+</div>
+<div class="kanban">
+  {% for col in colonnes %}
+  <section class="k-col" aria-label="{{ col.label }}">
+    <h3><span>{{ col.label }}</span><span class="badge t-gray">{{ col.items|length }}</span></h3>
+    {% for t in col.items %}
+    <article class="k-card">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+        <b>{{ t.titre }}</b>
+        <span class="badge {% if t.priorite == 'HAUTE' %}t-red{% elif t.priorite == 'BASSE' %}t-gray{% else %}t-blue{% endif %}">{{ t.get_priorite_display }}</span>
+      </div>
+      {% if t.description %}<p class="muted" style="font-size:13px;margin-bottom:8px">{{ t.description|truncatechars:90 }}</p>{% endif %}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--ink-3)">
+        {% if t.echeance %}<span class="badge {% if t.en_retard %}t-red{% else %}t-gray{% endif %}">{% icon "calendar-days" 12 %}{{ t.echeance|date:"d/m" }}</span>{% endif %}
+        {% if t.assignee %}<span>{% icon "user" 13 %} {{ t.assignee.first_name|default:t.assignee.username }}</span>{% endif %}
+      </div>
+      {% if can_write %}
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+        {% for code,label in col_statuts %}{% if code != t.statut %}
+        <form method="post" action="{% url 'taches:tache_move' t.pk %}">{% csrf_token %}<input type="hidden" name="statut" value="{{ code }}"><button class="btn btn-ghost btn-sm" type="submit">{{ label }}</button></form>
+        {% endif %}{% endfor %}
+        {% if can_admin %}<a class="btn btn-ghost btn-sm btn-icon" href="{% url 'taches:tache_edit' t.pk %}" title="Modifier">{% icon "pencil" 14 %}</a><a class="btn btn-danger btn-sm btn-icon" href="{% url 'taches:tache_delete' t.pk %}" title="Supprimer">{% icon "trash-2" 14 %}</a>{% endif %}
+      </div>
+      {% endif %}
+    </article>
+    {% empty %}<p class="muted" style="text-align:center;font-size:13px;padding:14px 0">Aucune tâche</p>{% endfor %}
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

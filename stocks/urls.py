@@ -6,8 +6,7 @@ app_name = 'stocks'
 
 urlpatterns = [
     path('', views.stock_dashboard, name='dashboard'),
-    path('partials/aliments/', views.aliments_partial, name='aliments_partial'),
-    path('partials/semences/', views.semences_partial, name='semences_partial'),
+
 
     # ==============================
     # PRODUITS

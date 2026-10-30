@@ -1,0 +1,17 @@
+name: Keep Supabase awake
+
+on:
+  schedule:
+    - cron: '17 6 * * *'   # tous les jours à 06:17 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /health/
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          test -n "$SITE_URL" || { echo "Définir la variable de dépôt SITE_URL"; exit 1; }
+          curl -fsS --retry 3 --max-time 30 "$SITE_URL/health/"

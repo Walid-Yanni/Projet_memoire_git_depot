@@ -3,7 +3,7 @@
 def get_health_score(kpis):
     """
     Calcule un score de santé globale (0-100%).
-    🔥 Très apprécié en soutenance
+    Très apprécié en soutenance
     """
     score = 100
     
@@ -30,8 +30,8 @@ def get_health_score(kpis):
 def get_health_status(score):
     """Retourne le statut qualitatif"""
     if score >= 80:
-        return {'label': 'Excellent', 'color': 'success', 'icon': '🟢'}
+        return {'label': 'Excellent', 'color': 'success', 'icon': 'badge-check'}
     elif score >= 50:
-        return {'label': 'Attention', 'color': 'warning', 'icon': '🟡'}
+        return {'label': 'Attention', 'color': 'warning', 'icon': 'triangle-alert'}
     else:
-        return {'label': 'Critique', 'color': 'danger', 'icon': '🔴'}
+        return {'label': 'Critique', 'color': 'danger', 'icon': 'circle-alert'}

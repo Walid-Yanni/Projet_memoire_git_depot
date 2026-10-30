@@ -1,0 +1,6 @@
+{% extends "ui/public_base.html" %}
+{% load ui %}
+{% block title %}Accès refusé{% endblock %}
+{% block body %}
+<div class="auth-wrap"><div class="auth-card" style="text-align:center"><span class="chip-ic t-red" style="width:56px;height:56px;margin:0 auto">{% icon "lock" 26 %}</span><h1>Accès refusé</h1><p class="muted">Cette action est réservée à l'administrateur de la ferme.</p><p style="margin-top:20px"><a class="btn btn-primary" href="{% url 'dashboard:home' %}">Retour au tableau de bord</a></p></div></div>
+{% endblock %}

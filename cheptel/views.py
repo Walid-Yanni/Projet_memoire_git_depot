@@ -1,11 +1,14 @@
 # cheptel/views.py
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db.models import Avg, Sum
 from datetime import date, timedelta
+from accounts.decorators import admin_required
 from .models import Animal, Espece, LotPondeuses, RapportJournalier, Traitement
 from .forms import AnimalForm, LotForm, RapportJournalierForm, TraitementForm
 
@@ -17,6 +20,7 @@ class AnimalListView(LoginRequiredMixin, ListView):
     model = Animal
     template_name = 'cheptel/animal_list.html'
     context_object_name = 'animaux'
+    paginate_by = 25
     
     def get_queryset(self):
         queryset = Animal.objects.filter(ferme=self.request.user.ferme).select_related('espece', 'lot')
@@ -37,6 +41,7 @@ class AnimalListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['ferme'] = self.request.user.ferme
         context['especes'] = Espece.objects.all().order_by('nom')
         context['lots'] = LotPondeuses.objects.filter(ferme=self.request.user.ferme).order_by('-date_mise_en_place')
 
@@ -70,7 +75,7 @@ class AnimalCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.ferme = self.request.user.ferme
         form.instance.createur = self.request.user
-        messages.success(self.request, "✅ Animal ajouté avec succès !")
+        messages.success(self.request, "Animal ajouté avec succès !")
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
@@ -94,8 +99,20 @@ class AnimalUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
     
     def form_valid(self, form):
-        messages.success(self.request, "✏️ Animal modifié avec succès !")
-        return super().form_valid(form)
+        # Sauvegarder sans commit pour préserver createur
+        instance = form.save(commit=False)
+        
+        # Récupérer et préserver le créateur original si l'animal existe
+        if instance.pk:
+            original_animal = Animal.objects.get(pk=instance.pk)
+            instance.createur = original_animal.createur
+        else:
+            instance.createur = self.request.user
+        
+        # Sauvegarder l'animal avec le createur préservé
+        instance.save()
+        messages.success(self.request, "Animal modifié avec succès !")
+        return redirect(self.get_success_url())
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -112,7 +129,7 @@ class AnimalDeleteView(LoginRequiredMixin, DeleteView):
         return Animal.objects.filter(ferme=self.request.user.ferme)
     
     def delete(self, request, *args, **kwargs):
-        messages.success(request, "🗑️ Animal supprimé avec succès !")
+        messages.success(request, "Animal supprimé avec succès !")
         return super().delete(request, *args, **kwargs)
 
 
@@ -151,7 +168,7 @@ class LotCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.ferme = self.request.user.ferme
         form.instance.createur = self.request.user
-        messages.success(self.request, f"✅ Lot '{form.instance.nom}' créé avec succès !")
+        messages.success(self.request, f"Lot '{form.instance.nom}' créé avec succès !")
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
@@ -176,7 +193,7 @@ class LotUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
     
     def form_valid(self, form):
-        messages.success(self.request, f"✏️ Lot '{form.instance.nom}' modifié avec succès !")
+        messages.success(self.request, f"Lot '{form.instance.nom}' modifié avec succès !")
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
@@ -196,7 +213,7 @@ class LotDeleteView(LoginRequiredMixin, DeleteView):
     
     def delete(self, request, *args, **kwargs):
         lot = self.get_object()
-        messages.success(self.request, f"🗑️ Lot '{lot.nom}' supprimé avec succès !")
+        messages.success(self.request, f"Lot '{lot.nom}' supprimé avec succès !")
         return super().delete(request, *args, **kwargs)
 
 
@@ -237,6 +254,7 @@ class RapportJournalierListView(LoginRequiredMixin, ListView):
         context['total_oeufs_mois'] = rapports_mois.aggregate(Sum('oeufs_pondus'))['oeufs_pondus__sum'] or 0
         context['moyenne_aliment'] = rapports_mois.aggregate(Avg('aliment_kg'))['aliment_kg__avg'] or 0
         
+        context['mois_noms'] = list(enumerate(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'], 1))
         context['annees_disponibles'] = RapportJournalier.objects.filter(
             ferme=self.request.user.ferme
         ).dates('date', 'year', order='DESC')
@@ -272,7 +290,7 @@ class RapportJournalierCreateView(LoginRequiredMixin, CreateView):
                 form.add_error(None, exc.message)
             return self.form_invalid(form)
 
-        messages.success(self.request, f"✅ Rapport du {form.instance.date.strftime('%d/%m/%Y')} enregistré !")
+        messages.success(self.request, f"Rapport du {form.instance.date.strftime('%d/%m/%Y')} enregistré !")
         return response
 
     def form_invalid(self, form):
@@ -306,7 +324,7 @@ class RapportJournalierUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
     
     def form_valid(self, form):
-        messages.success(self.request, f"✏️ Rapport du {form.instance.date.strftime('%d/%m/%Y')} modifié !")
+        messages.success(self.request, f"Rapport du {form.instance.date.strftime('%d/%m/%Y')} modifié !")
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
@@ -325,7 +343,7 @@ class RapportJournalierDeleteView(LoginRequiredMixin, DeleteView):
     
     def delete(self, request, *args, **kwargs):
         rapport = self.get_object()
-        messages.success(request, f"🗑️ Rapport du {rapport.date.strftime('%d/%m/%Y')} supprimé !")
+        messages.success(request, f"Rapport du {rapport.date.strftime('%d/%m/%Y')} supprimé !")
         return super().delete(request, *args, **kwargs)
 
 
@@ -407,7 +425,7 @@ class TraitementCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.ferme = self.request.user.ferme
         form.instance.operateur = self.request.user
-        messages.success(self.request, f"✅ {form.instance.get_type_display()} enregistré pour {form.instance.animal.identifiant}")
+        messages.success(self.request, f"{form.instance.get_type_display()} enregistré pour {form.instance.animal.identifiant}")
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
@@ -431,7 +449,7 @@ class TraitementUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
     
     def form_valid(self, form):
-        messages.success(self.request, f"✏️ {form.instance.get_type_display()} modifié")
+        messages.success(self.request, f"{form.instance.get_type_display()} modifié")
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
@@ -450,5 +468,5 @@ class TraitementDeleteView(LoginRequiredMixin, DeleteView):
     
     def delete(self, request, *args, **kwargs):
         traitement = self.get_object()
-        messages.success(self.request, f"🗑️ {traitement.get_type_display()} supprimé")
+        messages.success(self.request, f"{traitement.get_type_display()} supprimé")
         return super().delete(request, *args, **kwargs)

@@ -6,7 +6,7 @@ from stocks.models import ProduitStock
 from cultures.models import CultureParcelle
 
 
-def get_alertes(user):
+def get_alertes(user, limit=15):
     """Alertes multi-modules avec priorisation (danger > warning > info)"""
     ferme = user.ferme
     today = date.today()
@@ -27,7 +27,7 @@ def get_alertes(user):
             'type': 'vaccin',
             'module': 'cheptel',
             'niveau': 'warning' if jours <= 2 else 'info',
-            'message': f"💉 Vaccin {v.produit.nom} pour {v.animal.identifiant} dans {jours} jour(s)",
+            'message': f"Rappel {v.produit.nom} pour {v.animal.identifiant} dans {jours} jour(s)",
             'date': v.rappel_le
         })
     
@@ -43,7 +43,7 @@ def get_alertes(user):
             'type': 'maladie',
             'module': 'cheptel',
             'niveau': 'danger',
-            'message': f"🤒 {r.sujets_malades} animal(aux) malade(s) signalé(s) le {r.date.strftime('%d/%m/%Y')}",
+            'message': f"{r.sujets_malades} sujet(s) malade(s) signalé(s) le {r.date.strftime('%d/%m/%Y')}",
             'date': r.date
         })
     
@@ -60,7 +60,7 @@ def get_alertes(user):
             'type': 'stock_bas',
             'module': 'stock',
             'niveau': 'warning',
-            'message': f"⚠️ Stock bas : {p.nom} ({p.quantite_actuelle} {p.get_unite_display()})",
+            'message': f"Stock bas : {p.nom} ({p.quantite_txt} {p.unite_courte})",
             'date': today
         })
     
@@ -75,7 +75,7 @@ def get_alertes(user):
             'type': 'rupture',
             'module': 'stock',
             'niveau': 'danger',
-            'message': f"❌ Rupture de stock : {p.nom}",
+            'message': f"Rupture de stock : {p.nom}",
             'date': today
         })
     
@@ -94,7 +94,7 @@ def get_alertes(user):
             'type': 'recolte',
             'module': 'cultures',
             'niveau': 'info',
-            'message': f"🌾 Récolte de {r.culture.nom} sur {r.parcelle.nom} dans {jours} jour(s)",
+            'message': f"Récolte de {r.culture.nom} sur {r.parcelle.nom} dans {jours} jour(s)",
             'date': r.date_recolte_prevue
         })
     
@@ -102,4 +102,7 @@ def get_alertes(user):
     priority = {'danger': 1, 'warning': 2, 'info': 3}
     alertes.sort(key=lambda x: (priority[x['niveau']], x['date']))
     
-    return alertes[:15]  # Augmenté à 15 pour tenir compte des nouveaux types
+    icons = {'vaccin': 'syringe', 'maladie': 'heart-pulse', 'stock_bas': 'package', 'rupture': 'circle-x', 'recolte': 'wheat'}
+    for a in alertes:
+        a['icon'] = icons.get(a['type'], 'bell')
+    return alertes[:limit]  # Augmenté à 15 pour tenir compte des nouveaux types

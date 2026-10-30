@@ -96,7 +96,7 @@ def get_stock_evolution(user):
 def get_depenses_par_produit(user):
     """
     Graphique 4 : Répartition des dépenses par produit (Top 5)
-    🔥 Utilise F() pour le calcul correct du montant total
+    Utilise F() pour le calcul correct du montant total
     """
     ferme = user.ferme
     

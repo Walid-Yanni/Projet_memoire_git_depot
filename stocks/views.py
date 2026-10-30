@@ -14,14 +14,7 @@ from .services import StockService
 # DÉCORATEUR DE SÉCURITÉ
 # ==============================
 
-def admin_required(view_func):
-    """Vérifie que l'utilisateur a le rôle ADMIN"""
-    def wrapper(request, *args, **kwargs):
-        if request.user.role != 'ADMIN':
-            messages.error(request, "⛔ Accès refusé. Cette action est réservée aux administrateurs.")
-            return redirect('stocks:produit_list')
-        return view_func(request, *args, **kwargs)
-    return wrapper
+from accounts.decorators import admin_required  # noqa: E402
 
 
 # ==============================
@@ -33,31 +26,20 @@ def stock_dashboard(request):
     """Vue synthétique des stocks avec partials HTMX."""
     produits = ProduitStock.objects.filter(ferme=request.user.ferme)
     produits_alerte = produits.filter(quantite_actuelle__lte=F('seuil_alerte'))
+    total = produits.count()
 
+    produits = list(produits)
+    for p in produits:
+        cible = (p.seuil_alerte or 0) * 3 or 1
+        p.pct = max(3, min(100, int(p.quantite_actuelle / cible * 100)))
     context = {
         'aliments': produits,
         'semences': [],
         'produits_en_alerte': produits_alerte.count(),
-        'total_produits': produits.count(),
+        'total_produits': total,
+        'total_produits_ok': total - produits_alerte.count(),
     }
     return render(request, 'stocks/stocks.html', context)
-
-
-@login_required
-def aliments_partial(request):
-    """Table HTMX des intrants en stock."""
-    aliments = ProduitStock.objects.filter(ferme=request.user.ferme)
-    return render(request, 'stocks/aliments_table.html', {'aliments': aliments})
-
-
-@login_required
-def semences_partial(request):
-    """Table HTMX de la banque de semences.
-
-    Aucun modèle Semence n'existe encore dans l'application; on renvoie donc un
-    état vide fiable au lieu de laisser l'onglet tomber en 404.
-    """
-    return render(request, 'stocks/semences_table.html', {'semences': []})
 
 
 @login_required
@@ -92,7 +74,7 @@ def produit_create(request):
             produit = form.save(commit=False)
             produit.ferme = request.user.ferme
             produit.save()
-            messages.success(request, f"✅ Produit '{produit.nom}' créé avec succès.")
+            messages.success(request, f"Produit '{produit.nom}' créé avec succès.")
             return redirect('stocks:produit_list')
     else:
         form = ProduitStockForm()
@@ -110,7 +92,7 @@ def produit_update(request, pk):
         form = ProduitStockForm(request.POST, instance=produit)
         if form.is_valid():
             form.save()
-            messages.success(request, f"✏️ Produit '{produit.nom}' modifié avec succès.")
+            messages.success(request, f"Produit '{produit.nom}' modifié avec succès.")
             return redirect('stocks:produit_list')
     else:
         form = ProduitStockForm(instance=produit)
@@ -126,10 +108,10 @@ def produit_delete(request, pk):
     
     if request.method == 'POST':
         if produit.mouvements.count() > 0:
-            messages.error(request, f"❌ Impossible de supprimer '{produit.nom}' car il a {produit.mouvements.count()} mouvement(s) associé(s).")
+            messages.error(request, f"Impossible de supprimer '{produit.nom}' car il a {produit.mouvements.count()} mouvement(s) associé(s).")
         else:
             produit.delete()
-            messages.success(request, f"🗑️ Produit '{produit.nom}' supprimé avec succès.")
+            messages.success(request, f"Produit '{produit.nom}' supprimé avec succès.")
         return redirect('stocks:produit_list')
     
     return render(request, 'stocks/produit_confirm_delete.html', {'object': produit})
@@ -187,10 +169,10 @@ def entree_create(request):
                     prix_unitaire=form.cleaned_data.get('prix_unitaire'),
                     motif=form.cleaned_data.get('motif', '')
                 )
-                messages.success(request, f"✅ Entrée de {mouvement.quantite} {mouvement.produit.get_unite_display()} enregistrée.")
+                messages.success(request, f"Entrée de {mouvement.quantite} {mouvement.produit.get_unite_display()} enregistrée.")
                 return redirect('stocks:mouvement_list')
             except ValueError as e:
-                messages.error(request, f"❌ {str(e)}")
+                messages.error(request, f"{str(e)}")
     else:
         form = EntreeStockForm(user=request.user)
     
@@ -217,10 +199,10 @@ def sortie_create(request):
                     reference=form.cleaned_data.get('reference', ''),
                     motif=form.cleaned_data.get('motif', '')
                 )
-                messages.success(request, f"✅ Sortie de {mouvement.quantite} {mouvement.produit.get_unite_display()} enregistrée.")
+                messages.success(request, f"Sortie de {mouvement.quantite} {mouvement.produit.get_unite_display()} enregistrée.")
                 return redirect('stocks:mouvement_list')
             except ValueError as e:
-                messages.error(request, f"❌ {str(e)}")
+                messages.error(request, f"{str(e)}")
     else:
         form = SortieStockForm(user=request.user)
     
@@ -252,13 +234,13 @@ def mouvement_delete(request, pk):
                 produit.quantite_actuelle += mouvement.quantite
 
             if produit.quantite_actuelle < 0:
-                messages.error(request, "❌ Suppression impossible : elle rendrait le stock négatif.")
+                messages.error(request, "Suppression impossible : elle rendrait le stock négatif.")
                 return redirect('stocks:mouvement_list')
 
             produit.save(update_fields=['quantite_actuelle', 'updated_at'])
             mouvement.delete()
         
-        messages.success(request, f"🗑️ Mouvement supprimé et stock corrigé.")
+        messages.success(request, f"Mouvement supprimé et stock corrigé.")
         return redirect('stocks:mouvement_list')
     
     return render(request, 'stocks/mouvement_confirm_delete.html', {'object': mouvement})
