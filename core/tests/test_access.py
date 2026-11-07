@@ -18,6 +18,12 @@ class AccessPolicyTests(TestCase):
     def test_landing_public(self):
         self.assertEqual(self.client.get('/').status_code, 200)
 
+    def test_landing_visible_when_logged_in(self):
+        self.client.force_login(self.vis)
+        r = self.client.get('/')
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, 'Retour au tableau de bord')
+
     def test_health(self):
         self.assertEqual(self.client.get('/health/').status_code, 200)
 

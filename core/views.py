@@ -8,8 +8,7 @@ from django.views.decorators.http import require_POST
 
 
 def landing(request):
-    if request.user.is_authenticated:
-        return redirect('dashboard:home')
+    # Page publique : toujours affichée (un bouton ramène au tableau de bord si connecté)
     return render(request, 'core/landing.html')
 
 

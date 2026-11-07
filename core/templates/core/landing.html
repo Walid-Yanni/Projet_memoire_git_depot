@@ -4,7 +4,11 @@
 {% block body %}
 <header class="pub-nav">
   <a class="brand" href="{% url 'core:landing' %}"><span class="brand-mark">{% icon "sprout" 20 %}</span><span class="brand-name">FermeApp</span></a>
+  {% if user.is_authenticated %}
+  <a class="btn btn-line btn-sm" href="{% url 'dashboard:home' %}">{% icon "layout-dashboard" 15 %}Tableau de bord</a>
+  {% else %}
   <a class="btn btn-line btn-sm" href="{% url 'accounts:login' %}">{% icon "log-in" 15 %}Connexion</a>
+  {% endif %}
 </header>
 
 <section class="hero">
@@ -13,9 +17,13 @@
     <h1>Pilotez toute votre ferme depuis <em>un seul écran</em>.</h1>
     <p class="lead">Élevage, cultures, stocks et finances réunis dans une application web pensée pour les exploitations agro-pastorales : saisie rapide au quotidien, indicateurs clairs, alertes utiles.</p>
     <div class="cta-row">
+      {% if user.is_authenticated %}
+      <a class="btn btn-glow btn-lg" href="{% url 'dashboard:home' %}">{% icon "layout-dashboard" 17 %}Retour au tableau de bord</a>
+      {% else %}
       <form method="post" action="{% url 'core:demo_login' %}">{% csrf_token %}
         <button class="btn btn-glow btn-lg" type="submit">{% icon "play" 17 %}Essayer la démo</button>
       </form>
+      {% endif %}
       <a class="btn btn-line btn-lg" href="#modules">{% icon "layers" 17 %}Voir les modules</a>
     </div>
     <p style="margin-top:16px;font-size:13px;color:#6f889c">{% icon "eye" 14 %} Aucune inscription. Données fictives, accès en lecture seule.</p>
